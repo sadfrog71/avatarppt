@@ -31,7 +31,8 @@ Avoid purple, orange, green, black-gold, dark cyberpunk, and heavy multi-color p
 - Use dark navy for main titles and main metrics.
 - Use gray-blue for body text.
 - Use huge bold numbers for metrics when the slide has KPIs or quantitative outcomes.
-- Render all final Chinese text with deterministic layout tools. Do not ask an image model to draw Chinese text.
+- Keep Chinese text short and high-level in image-model prompts. Prefer concise labels, 2-6 word card titles, and one-line support text.
+- Generated Chinese text must be inspected after image generation. Regenerate the image if key terms are wrong, repeated, malformed, overlapped, cropped, or too small.
 
 ## Graphic Elements
 
@@ -98,7 +99,7 @@ Timeline, milestones, phase cards, or maturity ladder. Use dots, progress lines,
 
 ## AI Image Prompt Pattern
 
-Use image generation for illustration layers only. First infer the topic from the user's request and build the visual prompt around that topic.
+Use GPT Image or another image model to generate the final full-slide content PNG. First infer the topic from the user's request, reduce the message into a clean slide structure, then build the visual prompt around that topic.
 
 Prompt variables:
 
@@ -106,26 +107,31 @@ Prompt variables:
 - `{subject}`: the central visual object, such as product ecosystem, dashboard platform, service workflow, data network, facility, command center, device, map, or process scene.
 - `{scenario}`: the specific user goal and slide message.
 - `{visual_metaphors}`: 3-5 concrete objects or symbols that match the user's content.
+- `{exact_chinese_text}`: concise Chinese title, subtitles, labels, and card text to render. Keep it sparse and avoid long paragraphs.
 
 Generic prompt pattern:
 
 ```text
-blue-white enterprise technology presentation illustration for {domain}, {subject} representing {scenario}, include {visual_metaphors}, clean vector-like line art, optional isometric 2.5D perspective when useful, white and pale-blue surfaces, cobalt blue outlines, cyan accents, subtle technology arcs and data particles, polished Chinese enterprise report style, high clarity, no text, no labels, no people unless explicitly requested, no logos, 16:9
+16:9 full-slide Chinese enterprise PowerPoint page, blue-white enterprise technology style for {domain}, {subject} representing {scenario}, include {visual_metaphors}, clean vector-like line art, optional isometric 2.5D perspective when useful, white and pale-blue surfaces, cobalt blue outlines, cyan accents, subtle technology arcs and data particles, polished executive report style, render this exact concise Chinese text: {exact_chinese_text}, clear hierarchy, generous whitespace, no text overlap, no duplicated text, no cropped text, no malformed Chinese characters, no logos, 2560x1440
 ```
 
-Then compose final slide text, cards, charts, and labels in HTML/CSS/SVG/Canvas before exporting the final PNG.
+If the generated result contains Chinese errors or collisions, tighten the copy and regenerate the image. Do not patch around major text defects by inserting the faulty image into the PPT.
 
 ## Negative Prompt
 
 ```text
-no Chinese text, no English text, no watermark, no logo, no stock photo, no realistic photo, no cartoon, no dark cyberpunk, no neon overload, no purple palette, no orange palette, no heavy 3D render, no clutter
+no watermark, no logo, no stock photo, no realistic photo, no cartoon, no dark cyberpunk, no neon overload, no purple palette, no orange palette, no heavy 3D render, no clutter, no duplicated text, no overlapping text, no tiny unreadable text, no malformed Chinese characters, no random extra labels
 ```
 
 ## Final Image Checklist
 
 - Size is 16:9 and at least `2560x1440`.
 - All text is crisp and readable.
-- No AI-rendered malformed text exists.
+- No AI-rendered malformed Chinese text exists.
+- No repeated or duplicated Chinese phrases appear unless repetition is intentional.
+- No label, title, icon, card, chart annotation, or footer text overlaps another element.
+- No text is cropped at the slide edge or hidden behind decorative elements.
+- Key business terms match the user's source material.
 - Palette stays blue-white with the Parallel Digital cyan accent.
 - The image subject clearly matches the user's topic instead of defaulting to factories or water scenes.
 - Main content does not collide with subtle background texture.
