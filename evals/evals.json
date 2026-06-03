@@ -1,0 +1,20 @@
+{
+  "skill_name": "avatarppt",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "用平行数字模板做一份智慧水务汇报PPT，章节页用模板原章节页，只替换成“应用成效（一）/运营效率全面提升”，内容页用蓝白智慧水务风格整页图片插入。",
+      "expected_output": "A PPTX using the bundled template, with a native chapter divider page and at least one full-bleed image content slide."
+    },
+    {
+      "id": 2,
+      "prompt": "把这份材料整理成3个章节，每个章节先放模板章节页，再插入2张按智慧工厂风格生成的PNG内容页。",
+      "expected_output": "A chapter-organized PPTX with template chapter pages and six full-slide PNG content pages."
+    },
+    {
+      "id": 3,
+      "prompt": "做一个技术创新点PPT：AI决策、全流程管控、平台化运营。要求内容页都是图片，但章节页必须保留公司模板风格。",
+      "expected_output": "A PPTX where content slides are raster images in the specified blue-white industrial AI style and chapter slides preserve the template."
+    }
+  ]
+}

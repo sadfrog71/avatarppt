@@ -1,0 +1,144 @@
+---
+name: avatarppt
+description: Build image-based PowerPoint decks in the Parallel Digital standard template. Use this skill whenever the user wants blue-white smart water, industrial AI, digital factory, or platform-operation style slide images inserted into a PPT template by chapter. This skill is especially for workflows where content slides are rendered as full-slide PNG images, while chapter divider pages must come from the bundled Parallel Digital template and only have their text changed.
+---
+
+# Parallel Digital Image PPT
+
+Use this skill to create a PPTX where:
+
+- Chapter pages use the bundled Parallel Digital standard template unchanged except for text.
+- Content pages are full-slide PNG images composed in the blue-white smart-water / industrial AI style.
+- Images are inserted into the template in chapter order.
+
+## Required Assets
+
+Use `assets/parallel-digital-standard-template.pptx` as the source template. Do not edit the user's original template file.
+
+Read these references when needed:
+
+- `references/template-inventory.md` for slide indices, chapter page text boxes, and template colors.
+- `references/image-style-guide.md` for the content image visual system and prompt/composition rules.
+
+## Inputs To Ask For
+
+Ask only when missing:
+
+- Deck title and optional subtitle.
+- Chapter list, with each chapter's main title and subtitle.
+- Content slide outline under each chapter.
+- Any real photos/screenshots/case images that must appear.
+- Whether to keep template cover, catalogue, and closing pages. Default: keep all three.
+
+If the user gives loose material, first organize it into chapters and content slides, then proceed.
+
+## Output Contract
+
+Always deliver:
+
+- A final `.pptx` based on the bundled template.
+- Generated full-slide PNG files for all content pages.
+- A short slide inventory showing chapter order and inserted image filenames.
+
+## Workflow
+
+1. Plan the deck structure.
+   - Use template slide 1 as cover, slide 2 as catalogue, slide 3 as the reusable chapter page, and slide 5 as closing page.
+   - Do not use generated images for chapter pages.
+   - For every chapter, duplicate the template chapter page and replace only `MAIN TITLE` and `内容标题`.
+   - Insert that chapter's content PNG pages immediately after its chapter page.
+
+2. Compose content slides as images.
+   - Use 16:9 images at `2560x1440` minimum.
+   - Use deterministic layout/composition for all text: HTML/CSS, SVG, Canvas, or another controlled renderer.
+   - Do not rely on an image model to render Chinese text, numbers, labels, or tables.
+   - Use AI image generation only for illustration layers such as isometric factories, water treatment plants, platform dashboards, AI nodes, and abstract technology backgrounds.
+   - Final content slide images should already contain all text, charts, icons, backgrounds, and illustrations.
+
+3. Match the visual style.
+   - Follow `references/image-style-guide.md`.
+   - Blend the previous blue-white smart-water style with the Parallel Digital template colors:
+     - template blue `#005AAC`
+     - template cyan `#1DB5CD`
+     - smart-water bright blue `#006EE9`
+     - navy text `#001F3F`
+   - Content pages may be light/white, but chapter pages remain the dark Parallel Digital template.
+
+4. Assemble the PPTX.
+   - Create a manifest JSON.
+   - Run `scripts/assemble_deck.py` with that manifest.
+   - The script duplicates the chapter page, replaces text, inserts full-slide images, keeps optional cover/catalogue/closing pages, and saves the output PPTX.
+
+5. Verify.
+   - Open/read the output PPTX structure and confirm slide count/order.
+   - If a renderer is available, create thumbnails and inspect all slides.
+   - Check that chapter pages are template-native and that content pages are full-bleed images.
+
+## Manifest Example
+
+```json
+{
+  "output": "outputs/smart-water-demo.pptx",
+  "cover_title": "智慧水务智能工厂实践",
+  "footer": "平行数字  交叉现实",
+  "include_cover": true,
+  "include_catalogue": true,
+  "include_closing": true,
+  "sections": [
+    {
+      "main_title": "应用成效（一）",
+      "subtitle": "运营效率全面提升",
+      "slides": [
+        {
+          "title": "运营效率指标",
+          "image": "images/section-1-01.png"
+        }
+      ]
+    },
+    {
+      "main_title": "技术创新点（一）",
+      "subtitle": "AI智能决策与全流程管控",
+      "slides": [
+        {
+          "title": "全流程管控",
+          "image": "images/section-2-01.png"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Run:
+
+```bash
+python scripts/assemble_deck.py manifest.json
+```
+
+## Content Image Recipes
+
+Use these page types unless the user's material requires another structure:
+
+- Overview: left isometric plant illustration, right rounded info panel with icon rows.
+- Metrics: KPI cards, large blue numbers, circular icons, optional case-image placeholder.
+- Donut chart: large ring chart, icon explanation list, case-image placeholder.
+- Process: 5-step horizontal flow, circular icon nodes, arrows, bottom explanation cards.
+- Platform: central 2.5D platform/dashboard, side feature cards, dashed connector lines.
+- Cover-like content image: central smart factory, surrounding capability nodes, bottom-right KPI badge.
+
+## Hard Rules
+
+- Chapter pages are not rasterized; preserve the template chapter page and replace text only.
+- Content pages are raster images inserted full-bleed.
+- Do not place generated text directly from an AI image model in final slides.
+- Do not use stock-photo style, cartoon style, dark cyberpunk UI, multicolor gradients, heavy 3D, or decorative clutter.
+- Keep the PPT editable at the deck-structure level: chapter page text remains editable, content pages are replaceable images.
+
+## Assembly Notes
+
+When inserting content images manually instead of using the script:
+
+- Use slide size `12192000 x 6858000 EMU` or `13.333 x 7.5 in`.
+- Add content PNG at `left=0`, `top=0`, `width=slide_width`, `height=slide_height`.
+- Keep images at 16:9 to avoid stretching.
+- Place each image slide directly after the corresponding chapter divider.

@@ -1,0 +1,30 @@
+{
+  "output": "outputs/smart-water-demo.pptx",
+  "cover_title": "智慧水务智能工厂实践",
+  "footer": "平行数字  交叉现实",
+  "include_cover": true,
+  "include_catalogue": true,
+  "include_closing": true,
+  "sections": [
+    {
+      "main_title": "应用成效（一）",
+      "subtitle": "运营效率全面提升",
+      "slides": [
+        {
+          "title": "运营效率指标",
+          "image": "images/section-1-01.png"
+        }
+      ]
+    },
+    {
+      "main_title": "技术创新点（一）",
+      "subtitle": "AI智能决策与全流程管控",
+      "slides": [
+        {
+          "title": "全流程管控",
+          "image": "images/section-2-01.png"
+        }
+      ]
+    }
+  ]
+}
