@@ -101,6 +101,14 @@ Timeline, milestones, phase cards, or maturity ladder. Use dots, progress lines,
 
 Use GPT Image or another image model to generate the final full-slide content PNG. First infer the topic from the user's request, reduce the message into a clean slide structure, then build the visual prompt around that topic.
 
+Default to one final generated version per slide. Pick the page recipe automatically by judging how much detail and text the slide needs:
+
+- More text or many facts: use panels, matrices, status cards, or information architecture diagrams.
+- Fewer words or conceptual messages: use central illustrations, capability maps, curves, or process visuals.
+- Mixed facts and judgment: use a main visual plus 3-5 concise evidence cards.
+
+Do not generate several template/style alternatives unless the user asks for options. Regenerate only to fix Chinese accuracy, duplicate text, text overlap, cropped content, business meaning, or visual quality.
+
 Prompt variables:
 
 - `{domain}`: industry or context, such as manufacturing, healthcare, logistics, education, finance, public services, utilities, energy, real estate, AI platform, training, strategy, or policy.
@@ -126,6 +134,7 @@ no watermark, no logo, no stock photo, no realistic photo, no cartoon, no dark c
 ## Final Image Checklist
 
 - Size is 16:9 and at least `2560x1440`.
+- One strongest version was generated for each slide by default, not multiple template alternatives.
 - All text is crisp and readable.
 - No AI-rendered malformed Chinese text exists.
 - No repeated or duplicated Chinese phrases appear unless repetition is intentional.
