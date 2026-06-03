@@ -1,6 +1,6 @@
 ---
 name: avatarppt
-description: Build image-based PowerPoint decks in the Parallel Digital standard template. Use this skill whenever the user wants blue-white smart water, industrial AI, digital factory, or platform-operation style slide images inserted into a PPT template by chapter. This skill is especially for workflows where content slides are rendered as full-slide PNG images, while chapter divider pages must come from the bundled Parallel Digital template and only have their text changed.
+description: Build image-based PowerPoint decks in the Parallel Digital standard template. Use this skill whenever the user wants a polished chapter-based PPT where content slides are rendered as full-slide PNG images and inserted into the bundled template. This skill is especially for enterprise, government, product, project, technical, operations, strategy, training, or case-report decks where chapter divider pages must come from the template and only have their text changed.
 ---
 
 # Parallel Digital Image PPT
@@ -8,7 +8,7 @@ description: Build image-based PowerPoint decks in the Parallel Digital standard
 Use this skill to create a PPTX where:
 
 - Chapter pages use the bundled Parallel Digital standard template unchanged except for text.
-- Content pages are full-slide PNG images composed in the blue-white smart-water / industrial AI style.
+- Content pages are full-slide PNG images composed in a blue-white, template-compatible enterprise technology style adapted to the user's topic.
 - Images are inserted into the template in chapter order.
 
 ## Required Assets
@@ -52,15 +52,15 @@ Always deliver:
    - Use 16:9 images at `2560x1440` minimum.
    - Use deterministic layout/composition for all text: HTML/CSS, SVG, Canvas, or another controlled renderer.
    - Do not rely on an image model to render Chinese text, numbers, labels, or tables.
-   - Use AI image generation only for illustration layers such as isometric factories, water treatment plants, platform dashboards, AI nodes, and abstract technology backgrounds.
+   - Use AI image generation only for illustration layers. Choose the visual subject from the user's content, such as products, platforms, workflows, facilities, maps, devices, service scenes, dashboards, data networks, or abstract domain metaphors.
    - Final content slide images should already contain all text, charts, icons, backgrounds, and illustrations.
 
 3. Match the visual style.
    - Follow `references/image-style-guide.md`.
-   - Blend the previous blue-white smart-water style with the Parallel Digital template colors:
+   - Blend the content image style with the Parallel Digital template colors:
      - template blue `#005AAC`
      - template cyan `#1DB5CD`
-     - smart-water bright blue `#006EE9`
+     - bright blue `#006EE9`
      - navy text `#001F3F`
    - Content pages may be light/white, but chapter pages remain the dark Parallel Digital template.
 
@@ -78,8 +78,8 @@ Always deliver:
 
 ```json
 {
-  "output": "outputs/smart-water-demo.pptx",
-  "cover_title": "智慧水务智能工厂实践",
+  "output": "outputs/avatarppt-demo.pptx",
+  "cover_title": "项目成果汇报",
   "footer": "平行数字  交叉现实",
   "include_cover": true,
   "include_catalogue": true,
@@ -119,12 +119,14 @@ python scripts/assemble_deck.py manifest.json
 
 Use these page types unless the user's material requires another structure:
 
-- Overview: left isometric plant illustration, right rounded info panel with icon rows.
-- Metrics: KPI cards, large blue numbers, circular icons, optional case-image placeholder.
+- Topic opener: central subject illustration chosen from the deck topic, surrounding capability/value nodes, optional KPI or status badge.
+- Overview: left thematic illustration matched to the user's scenario, right rounded information panel with icon-led rows.
+- Metrics: KPI cards, large blue numbers, circular icons, optional evidence/case-image placeholder.
 - Donut chart: large ring chart, icon explanation list, case-image placeholder.
-- Process: 5-step horizontal flow, circular icon nodes, arrows, bottom explanation cards.
-- Platform: central 2.5D platform/dashboard, side feature cards, dashed connector lines.
-- Cover-like content image: central smart factory, surrounding capability nodes, bottom-right KPI badge.
+- Process: horizontal workflow with circular nodes, arrows, and bottom explanation cards. The node icons should match the actual process.
+- System/platform: central 2.5D system, product, platform, service, or scene illustration with side feature cards and dashed connector lines.
+- Comparison: two-column or matrix layout for before/after,方案对比, competitors, or option evaluation.
+- Roadmap: timeline, milestones, phase cards, and progress indicators matched to the project rhythm.
 
 ## Hard Rules
 

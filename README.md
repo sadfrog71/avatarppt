@@ -9,7 +9,7 @@ It keeps chapter divider pages native to the template and inserts generated full
 - Uses `assets/parallel-digital-standard-template.pptx` as the base template.
 - Reuses the template chapter page and only replaces its title/subtitle text.
 - Inserts content pages as full-bleed 16:9 PNG images.
-- Guides content images toward a blue-white smart water / industrial AI / digital factory style.
+- Guides content images toward a blue-white enterprise technology style that adapts to the user's topic.
 - Keeps Chinese text deterministic by rendering final slide text outside the image model.
 
 ## Project Structure

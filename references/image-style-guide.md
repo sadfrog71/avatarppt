@@ -4,9 +4,9 @@ This guide defines the full-slide PNG style used for content pages.
 
 ## Visual Direction
 
-Create a white-and-blue smart water / industrial AI / digital factory style.
+Create a white-and-blue enterprise technology presentation style that adapts to the user's topic.
 
-The feel should be clean, technical, executive, and suitable for Chinese enterprise or government-facing reporting. It should look like a polished smart-water solution presentation, not a generic SaaS landing page.
+The feel should be clean, technical, executive, and suitable for Chinese enterprise or government-facing reporting. It should look topic-specific and intentional, not like a generic SaaS landing page. The visual subject must come from the user's actual scenario.
 
 ## Palette
 
@@ -30,14 +30,14 @@ Avoid purple, orange, green, black-gold, dark cyberpunk, and heavy multi-color p
 - Use bold Chinese sans-serif for titles: Microsoft YaHei, Source Han Sans, Alibaba PuHuiTi, or equivalent.
 - Use dark navy for main titles and main metrics.
 - Use gray-blue for body text.
-- Use huge bold numbers for KPIs.
+- Use huge bold numbers for metrics when the slide has KPIs or quantitative outcomes.
 - Render all final Chinese text with deterministic layout tools. Do not ask an image model to draw Chinese text.
 
 ## Graphic Elements
 
 Use these recurring elements:
 
-- Isometric 2.5D water treatment plants, factories, dashboards, data platforms.
+- Topic-specific hero illustrations: products, platforms, facilities, devices, service scenes, maps, operations centers, dashboards, data platforms, workflow scenes, or abstract domain metaphors.
 - Blue line-art buildings with white fills and pale-blue shadows.
 - Circular icon badges with blue gradients, white icon strokes, outer rings, and soft glow.
 - Thin dashed connector lines with circular endpoints.
@@ -47,20 +47,26 @@ Use these recurring elements:
 
 ## Drawing Rules
 
-- Industrial scenes should use 30-degree isometric perspective.
+- Use 30-degree isometric perspective when the subject benefits from spatial explanation, such as facilities, systems, platforms, operations centers, devices, process scenes, or multi-node networks.
 - Line weight should feel vector-like: main strokes 2-4 px, detail strokes 1-2 px at 2560x1440.
 - Use white fills, pale-blue surfaces, blue outlines, and small gradients for depth.
-- Icons should be simple, geometric, and consistent: water drop, shield, gear, cloud, AI chip, dashboard, factory, trophy, sensor, link, chart.
+- Icons should be simple, geometric, and consistent. Select icons from the user's domain, such as shield, gear, cloud, AI chip, dashboard, facility, device, user, service, map, sensor, document, link, chart, trophy, wallet, hospital, logistics, energy, education, or policy symbols.
 - Cards should have light blue borders, 18-28 px visual radius at 2560x1440, and soft shadows.
 - Data visuals should be readable and not Excel-like.
 
 ## Page Recipes
 
+### Topic Opener
+
+Central subject illustration chosen from the user's deck topic. Surround it with 4-6 circular capability/value nodes. Add an optional KPI/status badge only if the content includes a real metric.
+
+Examples: product ecosystem, service platform, operations center, city map, facility, hospital, logistics network, data platform, policy system, training framework.
+
 ### Overview
 
-Left 40%: isometric plant illustration.
+Left 35-45%: thematic illustration matched to the user's scenario.
 
-Right 60%: large rounded panel with 5-6 icon rows.
+Right 55-65%: large rounded panel with 4-6 icon-led information rows.
 
 ### Metrics
 
@@ -72,22 +78,39 @@ Large donut chart on the left, icon explanation list in the middle, case image p
 
 ### Process
 
-Five horizontal circular nodes connected by arrows. Add short labels below each node and explanation cards along the bottom.
+Horizontal circular nodes connected by arrows. The number of nodes should match the actual process, usually 4-6. Add short labels below each node and explanation cards along the bottom.
 
-### Platform
+### System / Platform / Solution
 
-Central 2.5D dashboard/platform. Feature cards on left and right. Dashed lines connect cards to the center.
+Central 2.5D subject illustration chosen from the content: system, product, platform, service, facility, workflow, or solution architecture. Feature cards sit on the left and right. Dashed lines connect cards to the center.
 
 ### Capability Map
 
-Central factory or platform. Surrounding circular icon nodes connected with thin lines.
+Central topic subject with surrounding circular capability nodes connected by thin lines.
+
+### Comparison
+
+Two-column, matrix, or before/after structure. Use restrained accent tags, icon-led rows, and clear contrast without using harsh red/green unless the user requests it.
+
+### Roadmap
+
+Timeline, milestones, phase cards, or maturity ladder. Use dots, progress lines, and compact cards.
 
 ## AI Image Prompt Pattern
 
-Use image generation for illustration layers only:
+Use image generation for illustration layers only. First infer the topic from the user's request and build the visual prompt around that topic.
+
+Prompt variables:
+
+- `{domain}`: industry or context, such as manufacturing, healthcare, logistics, education, finance, public services, utilities, energy, real estate, AI platform, training, strategy, or policy.
+- `{subject}`: the central visual object, such as product ecosystem, dashboard platform, service workflow, data network, facility, command center, device, map, or process scene.
+- `{scenario}`: the specific user goal and slide message.
+- `{visual_metaphors}`: 3-5 concrete objects or symbols that match the user's content.
+
+Generic prompt pattern:
 
 ```text
-blue-white smart water industrial AI illustration, isometric 2.5D water treatment plant, clean vector-like line art, white building surfaces, cobalt blue outlines, pale blue shadows, subtle technology arcs and data particles, enterprise presentation style, high clarity, no text, no labels, no people, no logos, 16:9
+blue-white enterprise technology presentation illustration for {domain}, {subject} representing {scenario}, include {visual_metaphors}, clean vector-like line art, optional isometric 2.5D perspective when useful, white and pale-blue surfaces, cobalt blue outlines, cyan accents, subtle technology arcs and data particles, polished Chinese enterprise report style, high clarity, no text, no labels, no people unless explicitly requested, no logos, 16:9
 ```
 
 Then compose final slide text, cards, charts, and labels in HTML/CSS/SVG/Canvas before exporting the final PNG.
@@ -104,5 +127,6 @@ no Chinese text, no English text, no watermark, no logo, no stock photo, no real
 - All text is crisp and readable.
 - No AI-rendered malformed text exists.
 - Palette stays blue-white with the Parallel Digital cyan accent.
+- The image subject clearly matches the user's topic instead of defaulting to factories or water scenes.
 - Main content does not collide with subtle background texture.
 - The slide still works when inserted full-bleed into the template.
