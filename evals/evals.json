@@ -1,20 +1,20 @@
 {
-  "skill_name": "avatarppt",
+  "skill_name": "imageavatarppt",
   "evals": [
     {
       "id": 1,
-      "prompt": "用平行数字模板做一份项目成果汇报PPT，章节页用模板原章节页，只替换章节标题，内容页根据项目主题生成蓝白科技风整页图片并插入。",
-      "expected_output": "A PPTX using the bundled template, with native chapter divider pages and topic-adaptive full-bleed image content slides."
+      "prompt": "把这份项目大纲整理成管理层汇报PPT。使用墨绿、深青、金色强调色，内容页用 GPT Image 生成，模板页也改成相同色系。",
+      "expected_output": "A validated deck plan, palette-injected GPT Image prompts, recolored native template pages, generated full-bleed images, and a PPTX with inventory."
     },
     {
       "id": 2,
-      "prompt": "把这份材料整理成3个章节，每个章节先放模板章节页，再插入2张根据章节主题生成的PNG内容页。",
-      "expected_output": "A chapter-organized PPTX with template chapter pages and six full-slide PNG content pages adapted to each chapter topic."
+      "prompt": "把这份材料整理成3个章节，每章2页，使用 MiniMax image-01 生图，指定藏蓝、银灰、亮青色系。",
+      "expected_output": "A three-section deck plan using the MiniMax adapter, six palette-controlled image prompts, validated 16:9 PNGs, and an assembled PPTX."
     },
     {
       "id": 3,
-      "prompt": "做一个技术创新点PPT：AI决策、全流程管控、平台化运营。要求内容页都是图片，并且图片主题要根据每页内容生成；章节页必须保留公司模板风格。",
-      "expected_output": "A PPTX where content slides are topic-adaptive raster images in the blue-white enterprise technology style and chapter slides preserve the template."
+      "prompt": "做一个技术创新点PPT：AI决策、全流程管控、平台化运营。GPT Image 负责生图，Kimi 检查中文、重叠、裁切和色系一致性。",
+      "expected_output": "A deck with GPT Image content slides, a Kimi visual QA report, failed-slide regeneration when needed, and assembly blocked until QA passes."
     }
   ]
 }

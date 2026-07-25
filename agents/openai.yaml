@@ -1,0 +1,4 @@
+interface:
+  display_name: "Image Avatar PPT"
+  short_description: "从文字大纲生成指定色系的图片型企业 PPT，并支持多模态质检"
+  default_prompt: "Use $imageavatarppt to turn my outline into a palette-controlled PPTX."

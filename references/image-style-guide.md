@@ -4,32 +4,34 @@ This guide defines the full-slide PNG style used for content pages.
 
 ## Visual Direction
 
-Create a white-and-blue enterprise technology presentation style that adapts to the user's topic.
+Create a palette-controlled enterprise presentation style that adapts to the user's topic.
 
-The feel should be clean, technical, executive, and suitable for Chinese enterprise or government-facing reporting. It should look topic-specific and intentional, not like a generic SaaS landing page. The visual subject must come from the user's actual scenario.
+The feel should be clean, technical, executive, and suitable for Chinese enterprise or government-facing reporting. It should look topic-specific and intentional, not like a generic SaaS landing page. The visual subject must come from the user's actual scenario. The user palette is authoritative.
+
+Keep the communication restrained. Do not add heroic slogans, market-leader
+claims, winner/loser framing, or exaggerated language that the source did not
+state. Avoid lines such as "不是追赶者，而是定义者", "重新定义行业", "行业唯一",
+or "绝对领先" unless the user explicitly asks for that exact language. Prefer
+measurable, neutral wording.
 
 ## Palette
 
-Use these colors consistently:
+Use the exact colors from `deck-plan.json` consistently:
 
-- Navy title: `#001F3F`
-- Deep template blue: `#005AAC`
-- Primary blue: `#006EE9`
-- Bright blue: `#1090F0`
-- Mid blue: `#4F82CA`
-- Cyan accent: `#1DB5CD`
-- Pale blue: `#E8F2FD`
-- Border blue: `#BFE1FF`
-- Body gray-blue: `#506080`
-- Background white: `#F8FCFF` / `#FFFFFF`
+- `primary`: main structures, data series, strong borders, and major icons.
+- `secondary`: title bands, deep surfaces, and supporting structures.
+- `accent`: highlights, active nodes, callouts, and no more than 15% of the page.
+- `background`: the dominant slide canvas and card surfaces.
+- `text`: titles and body text.
+- `muted`: secondary copy, dividers, inactive data, and subtle borders.
 
-Avoid purple, orange, green, black-gold, dark cyberpunk, and heavy multi-color palettes.
+Create lighter and darker tints from these colors only when needed for hierarchy. Do not introduce unrelated hue families. When no palette is supplied, default to the original Parallel Digital blue/cyan system.
 
 ## Typography
 
 - Use bold Chinese sans-serif for titles: Microsoft YaHei, Source Han Sans, Alibaba PuHuiTi, or equivalent.
-- Use dark navy for main titles and main metrics.
-- Use gray-blue for body text.
+- Use the palette `text` color for main titles and main metrics.
+- Use the palette `muted` color for body text.
 - Use huge bold numbers for metrics when the slide has KPIs or quantitative outcomes.
 - Keep Chinese text short and high-level in image-model prompts. Prefer concise labels, 2-6 word card titles, and one-line support text.
 - Generated Chinese text must be inspected after image generation. Regenerate the image if key terms are wrong, repeated, malformed, overlapped, cropped, or too small.
@@ -39,10 +41,10 @@ Avoid purple, orange, green, black-gold, dark cyberpunk, and heavy multi-color p
 Use these recurring elements:
 
 - Topic-specific hero illustrations: products, platforms, facilities, devices, service scenes, maps, operations centers, dashboards, data platforms, workflow scenes, or abstract domain metaphors.
-- Blue line-art buildings with white fills and pale-blue shadows.
-- Circular icon badges with blue gradients, white icon strokes, outer rings, and soft glow.
+- Palette-colored line-art subjects with background-colored fills and restrained shadows.
+- Circular icon badges using `primary`, `secondary`, and `accent`, with white or background-colored icon strokes.
 - Thin dashed connector lines with circular endpoints.
-- Rounded white or pale-blue cards with subtle border and shadow.
+- Rounded background-colored cards with subtle palette borders and shadows.
 - Donut charts, progress rings, horizontal metric lines, and icon-led KPI cards.
 - Background texture: bottom wave lines, dot matrices, hexagon outlines, network-node lines, concentric arcs.
 
@@ -50,7 +52,7 @@ Use these recurring elements:
 
 - Use 30-degree isometric perspective when the subject benefits from spatial explanation, such as facilities, systems, platforms, operations centers, devices, process scenes, or multi-node networks.
 - Line weight should feel vector-like: main strokes 2-4 px, detail strokes 1-2 px at 2560x1440.
-- Use white fills, pale-blue surfaces, blue outlines, and small gradients for depth.
+- Use background fills, palette tints, primary outlines, and small gradients for depth.
 - Icons should be simple, geometric, and consistent. Select icons from the user's domain, such as shield, gear, cloud, AI chip, dashboard, facility, device, user, service, map, sensor, document, link, chart, trophy, wallet, hospital, logistics, energy, education, or policy symbols.
 - Cards should have light blue borders, 18-28 px visual radius at 2560x1440, and soft shadows.
 - Data visuals should be readable and not Excel-like.
@@ -120,20 +122,50 @@ Prompt variables:
 Generic prompt pattern:
 
 ```text
-16:9 full-slide Chinese enterprise PowerPoint page, blue-white enterprise technology style for {domain}, {subject} representing {scenario}, include {visual_metaphors}, clean vector-like line art, optional isometric 2.5D perspective when useful, white and pale-blue surfaces, cobalt blue outlines, cyan accents, subtle technology arcs and data particles, polished executive report style, render this exact concise Chinese text: {exact_chinese_text}, clear hierarchy, generous whitespace, no text overlap, no duplicated text, no cropped text, no malformed Chinese characters, no logos, 2560x1440
+16:9 full-slide Chinese enterprise PowerPoint page for {domain}, {subject} representing {scenario}, include {visual_metaphors}, exact palette {palette}, clean vector-like line art, optional isometric 2.5D perspective when useful, polished executive report style, render this exact concise Chinese text: {exact_chinese_text}, clear hierarchy, generous whitespace, no text overlap, no duplicated text, no cropped text, no malformed Chinese characters, no logos
 ```
 
 If the generated result contains Chinese errors or collisions, tighten the copy and regenerate the image. Do not patch around major text defects by inserting the faulty image into the PPT.
 
+### Direct Codex ImageGen Slide
+
+Use this route when the user wants the image model to design the whole PPT page,
+or when previous outputs looked like text placed on top of a background. In this
+route, prompt Codex's built-in `image_gen` tool to generate the complete
+full-slide page as one integrated bitmap.
+
+Prompt pattern:
+
+```text
+Use case: productivity-visual / infographic-diagram.
+Asset type: complete 16:9 executive PowerPoint slide image.
+Primary request: design the entire slide as one integrated page. The visual
+composition, Chinese text, icons, KPI figures, scene, and hierarchy must be
+conceived as one whole. Do not create a background first and then place cards or
+text on top.
+Palette: {palette}.
+Topic: {slide_topic}.
+Core message: {message}.
+Exact visible Chinese text: {concise_text}.
+Composition direction: {specific scene / metaphor / flow / architecture}.
+Avoid: watermark, logo, pseudo text, invented claims, inflated slogans,
+oversized opaque cards, dense bullet pages, separate background + overlay feel.
+```
+
+Keep the exact visible Chinese text short. For longer source material, convert
+it into speaker notes or subsequent slides rather than asking the image model to
+render paragraphs. Inspect the output at full size; regenerate if any key
+Chinese term is malformed, oddly spaced, or visually detached from the page.
+
 ## Negative Prompt
 
 ```text
-no watermark, no logo, no stock photo, no realistic photo, no cartoon, no dark cyberpunk, no neon overload, no purple palette, no orange palette, no heavy 3D render, no clutter, no duplicated text, no overlapping text, no tiny unreadable text, no malformed Chinese characters, no random extra labels
+no watermark, no logo, no stock photo, no realistic photo, no cartoon, no dark cyberpunk, no neon overload, no unrelated colors, no heavy 3D render, no clutter, no duplicated text, no overlapping text, no tiny unreadable text, no malformed Chinese characters, no random extra labels
 ```
 
 ## Final Image Checklist
 
-- Size is 16:9 and at least `2560x1440`.
+- Size is 16:9 and meets the configured provider output size.
 - One strongest version was generated for each slide by default, not multiple template alternatives.
 - All text is crisp and readable.
 - No AI-rendered malformed Chinese text exists.
@@ -141,7 +173,7 @@ no watermark, no logo, no stock photo, no realistic photo, no cartoon, no dark c
 - No label, title, icon, card, chart annotation, or footer text overlaps another element.
 - No text is cropped at the slide edge or hidden behind decorative elements.
 - Key business terms match the user's source material.
-- Palette stays blue-white with the Parallel Digital cyan accent.
+- Palette matches the exact hex values in `deck-plan.json`.
 - The image subject clearly matches the user's topic instead of defaulting to factories or water scenes.
 - Main content does not collide with subtle background texture.
 - The slide still works when inserted full-bleed into the template.
