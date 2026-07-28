@@ -61,6 +61,14 @@ Deliver:
 2. Create `deck-plan.json`.
    - Follow `references/deck-plan-schema.md`.
    - Choose a page role for every content slide: `opener`, `overview`, `metrics`, `process`, `system`, `comparison`, `roadmap`, or `custom`.
+   - For image-based PPT requests where the user asks ImageGen / GPT Image /
+     Codex image generation to output the PPT pages themselves, prefer
+     `direct_imagegen_slide` as the default route. Do not downgrade to
+     text-free backgrounds plus local text overlay merely because the deck has
+     substantial content. Instead, restructure the story, split pages when
+     needed, and keep each slide's visible text to a designed set of readable
+     thesis lines, KPI figures, labels, and evidence points. Put surplus detail
+     into `speaker_notes`.
    - When the user explicitly wants GPT Image / Codex image generation to make
      the PPT page itself, or complains that text and background are not designed
      as one whole, set `image_generation.composition_mode` to
@@ -69,10 +77,18 @@ Deliver:
      metaphor, scene, diagrams, KPI figures, labels, and Chinese hierarchy are
      conceived together in the prompt. Do not generate a text-free background
      and do not run local overlay compositors for these content pages.
-   - For content-rich decks, set `image_generation.local_text_overlay` to
-     `true` and `source_directory` to a separate folder. The provider then
-     creates text-free visual backgrounds while the local compositor preserves
-     all required copy exactly.
+   - In `direct_imagegen_slide`, plan each page as a complete visual argument:
+     a main thesis, a visual structure that embodies that thesis, and a small
+     number of supporting proof points. The background must carry meaning
+     (timeline, bridge, platform, command center, workflow, evidence chain,
+     KPI dashboard, architecture, service scene, or roadmap), not act as a
+     decorative layer behind pasted text.
+   - Use `image_generation.local_text_overlay = true` only when the user has
+     not asked ImageGen to design the PPT pages themselves and the deck must
+     preserve a large amount of exact editable text. In that route, set
+     `source_directory` to a separate folder. The provider then creates
+     text-free visual backgrounds while the local compositor preserves all
+     required copy exactly.
    - When the user asks ImageGen to participate in the PPT design itself rather
      than provide illustrations, set `image_generation.composition_mode` to
      `designed_canvas`. Prompt the image model to create full-slide,
@@ -121,19 +137,29 @@ with a complete prompt containing:
 
 - use case: `productivity-visual` or `infographic-diagram`;
 - asset type: complete 16:9 executive PowerPoint slide image;
+- primary request: design the entire slide as one integrated executive report
+  page that is understandable without speaker narration;
 - exact palette;
 - exact visible Chinese text, kept concise;
 - integrated composition direction that binds text, scene, diagrams, KPI
   figures, and visual hierarchy into one page;
+- page-specific composition: do not reuse one left-title/right-card layout
+  across the deck. Let each slide's message choose the form, such as two-column
+  comparison, deployment-gap bridge, structural bottleneck map, knowledge
+  foundation platform, agent matrix, command center dashboard, closed-loop
+  workflow, KPI evidence board, service model comparison, or rollout roadmap;
 - avoid list: no watermark, no logo, no pseudo text, no extra claims, no
   marketing exaggeration, no oversized opaque cards, no separate background +
   overlay feel.
 
 After each `image_gen` call, inspect the slide image directly. Reject malformed
 Chinese, invented slogans, awkward spacing, visual clutter, or a composition
-that feels like a background with text pasted over it. Save accepted PNGs into
-the workspace output directory, then assemble them full-bleed into PPTX using
-the Presentation skill's `@oai/artifact-tool` workflow or the local assembler.
+that feels like a background with text pasted over it. Also reject pages where
+the visible copy is too sparse to carry the source argument, or where the
+background dominates and the core message cannot be read at contact-sheet
+thumbnail size. Save accepted PNGs into the workspace output directory, then
+assemble them full-bleed into PPTX using the Presentation skill's
+`@oai/artifact-tool` workflow or the local assembler.
 
 For provider-script generation, run:
 

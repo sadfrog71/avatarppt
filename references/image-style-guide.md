@@ -134,15 +134,23 @@ or when previous outputs looked like text placed on top of a background. In this
 route, prompt Codex's built-in `image_gen` tool to generate the complete
 full-slide page as one integrated bitmap.
 
+This route is the preferred route for image-based PPT deliverables where the
+user asks ImageGen / GPT Image / Codex image generation to produce the slide
+pages themselves. Do not treat the image model as a background generator in this
+case. Text, diagrams, KPI figures, icons, visual metaphor, and hierarchy must be
+planned as one page. If the source has too much material, split the argument
+across more slides or move supporting detail into speaker notes rather than
+falling back to local overlay.
+
 Prompt pattern:
 
 ```text
 Use case: productivity-visual / infographic-diagram.
 Asset type: complete 16:9 executive PowerPoint slide image.
-Primary request: design the entire slide as one integrated page. The visual
-composition, Chinese text, icons, KPI figures, scene, and hierarchy must be
-conceived as one whole. Do not create a background first and then place cards or
-text on top.
+Primary request: design the entire slide as one integrated executive report
+page that is understandable without speaker narration. The visual composition,
+Chinese text, icons, KPI figures, scene, and hierarchy must be conceived as one
+whole. Do not create a background first and then place cards or text on top.
 Palette: {palette}.
 Topic: {slide_topic}.
 Core message: {message}.
@@ -156,6 +164,17 @@ Keep the exact visible Chinese text short. For longer source material, convert
 it into speaker notes or subsequent slides rather than asking the image model to
 render paragraphs. Inspect the output at full size; regenerate if any key
 Chinese term is malformed, oddly spaced, or visually detached from the page.
+
+For a deck, vary the page structure by message. Avoid repeating the same
+left-title/right-card composition. Let the slide's argument choose the visual
+form: two-column comparison, deployment-gap bridge, structural bottleneck map,
+knowledge-foundation platform, agent expert matrix, command center dashboard,
+closed-loop workflow, KPI evidence board, service-model contrast, or rollout
+roadmap. The background should carry meaning, not serve as decorative wallpaper.
+
+The visible text should be concise but sufficient to express the source
+argument. A slide with only a title and generic labels is under-specified unless
+the slide is intentionally a chapter divider or closing page.
 
 ## Negative Prompt
 
@@ -177,3 +196,8 @@ no watermark, no logo, no stock photo, no realistic photo, no cartoon, no dark c
 - The image subject clearly matches the user's topic instead of defaulting to factories or water scenes.
 - Main content does not collide with subtle background texture.
 - The slide still works when inserted full-bleed into the template.
+- In contact-sheet thumbnail view, the main thesis and visual argument are
+  still recognizable.
+- The page does not feel like local text pasted onto a generated background.
+- For direct ImageGen decks, layouts vary according to slide role rather than
+  repeating one template composition.

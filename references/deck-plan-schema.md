@@ -76,7 +76,11 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
 
 - Keep `id` and `image` unique.
 - Use valid six-digit hex colors.
-- Keep `exact_text` concise; each item should normally be under 18 Chinese characters.
+- Keep `exact_text` concise and designed for the page. Short labels should
+  normally be under 18 Chinese characters, but thesis lines, KPI captions, and
+  evidence points may be longer when they are necessary for the slide to carry
+  the source argument. Avoid long paragraphs; split pages or use speaker notes
+  when the visible text would become dense.
 - Put real quantitative claims in `facts`; do not synthesize unsupported values.
 - Leave `prompt` empty only when `generate_images.py` should compose it from the structured fields.
 - Keep at most four sections when `include_catalogue` is true.
@@ -84,7 +88,10 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
 - Use `image_generation.composition_mode = "direct_imagegen_slide"` when Codex
   should call built-in `image_gen` to design each whole slide as one integrated
   page. In that mode, do not set `local_text_overlay` and do not ask the
-  provider to create a text-free background.
+  provider to create a text-free background. The prompt must bind Chinese text,
+  diagrams, KPI figures, scene, and information hierarchy into one visual
+  argument, and should avoid repeated template-like compositions across the
+  deck.
 - Avoid exaggerated, promotional conclusions in `exact_text` and prompts. Do
   not invent lines such as "不是追赶者，而是定义者"; use restrained claims tied to
   the source outline.
