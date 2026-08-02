@@ -27,6 +27,10 @@ Before planning pages, write four items:
 If two plausible theses would produce materially different decks, ask the user
 one focused question before fixing the page count or generating images.
 
+The `core_thesis` governs the deck but is not automatic page copy. Keep it
+behind the storyboard by default. Reveal it only on the page where the source,
+argument, and narrative timing support an explicit strategic judgment.
+
 ## 2. Build A Causal Story, Not An Outline Dump
 
 Choose the shortest arc that supports the decision. Common arcs:
@@ -59,6 +63,14 @@ For every content slide define:
 - `audience_question`: the question in the audience's mind.
 - `message`: the answer or conclusion; use it as the basis for a conclusion-led
   title.
+- `narrative_role`: what this page does in the argument, described in natural
+  language rather than forced into a closed layout taxonomy.
+- `thesis_expression`: `implicit` when the deck thesis remains subtext;
+  `explicit` only when this page intentionally reveals or states it.
+- `content_boundary`: the source-backed content this page may show and the
+  solution, outcome, or future-state material that must remain deferred.
+- `thesis_connection`: how the page advances the deck thesis through evidence,
+  tension, visual continuity, or transition without automatically restating it.
 - `claim_type`: `fact`, `inference`, `proposal`, or `decision`.
 - `facts`: source-backed evidence. Keep assumptions visibly separate from facts.
 - `information_topology`: how the ideas relate, such as shared center, cause and
@@ -78,9 +90,19 @@ Except for cover, chapter, and closing pages, avoid topic-only titles such as
 "平台架构" or "项目成效". Prefer conclusions such as "统一知识底座是规模化复制
 的前提". The title should state what is true; the visual should show why.
 
+Do not confuse thesis alignment with thesis repetition. A problem page can
+support a future platform recommendation by making fragmentation, delay, or
+operational pressure visible. It must not display the future platform, its
+architecture, or its slogan unless that solution is part of the page's source
+content. Visual objects carry claims just as text does.
+
 ## 4. Control Page-to-Page Flow
 
 - Make slide N+1 answer the question raised by slide N.
+- Respect reveal timing. Context and diagnosis establish the current state;
+  evidence sharpens the tension; transition pages open the next question;
+  solution and decision pages reveal the answer. Do not let visual generation
+  collapse these stages into one page.
 - Keep one stable visual anchor across adjacent pages when they discuss the same
   system: the same process spine, architecture layers, value dimensions, or
   roadmap axis.
@@ -103,6 +125,8 @@ Review the complete storyboard before any paid image generation.
 - Can the deck be summarized in one sentence?
 - Does every slide strengthen, qualify, prove, or operationalize that sentence?
 - If a slide is removed, does the argument weaken? If not, merge or delete it.
+- Does each slide advance the thesis without unnecessarily writing or drawing
+  the thesis itself?
 
 ### Executive test
 
@@ -128,6 +152,9 @@ Review the complete storyboard before any paid image generation.
 - Does the topology match the actual relationship among the ideas?
 - Are meaningful relationships visible rather than flattened into isolated
   cards or table rows?
+- Does every visible object stay inside the page's `content_boundary`?
+- On `implicit` pages, is the deck thesis absent from visible copy and literal
+  solution imagery while still being supported by visual subtext and flow?
 - Is the canvas solid white or a user-approved solid brand color, with no busy
   background texture or scenic wallpaper?
 - Does the contact sheet show a deliberate rhythm: establish -> explain -> prove

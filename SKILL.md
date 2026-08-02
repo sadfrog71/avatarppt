@@ -57,6 +57,8 @@ Deliver:
      proposal, strategy, steering-committee, or major-project decks.
    - Identify audience, decision goal, evidence, constraints, and missing facts.
    - Write one `core_thesis`: the central judgment the audience should remember.
+     Treat it as a deck-level planning compass, not automatic visible copy for
+     every page.
    - Write one `decision_request`: the decision, approval, alignment, or next
      action expected from the audience.
    - Define 1-3 `audience_priority` items and a 3-6 move `story_arc` that leads
@@ -73,6 +75,17 @@ Deliver:
      `message`, one explicit transition into the next page, and one dominant
      `visual_focus` describing the visual system. Except for cover, chapter, and closing pages, avoid
      topic-only titles.
+   - Define the slide's `narrative_role`, `thesis_expression`,
+     `content_boundary`, and `thesis_connection`. Separate the deck-level
+     north star from the page-level claim: a diagnosis page must diagnose, an
+     evidence page must prove, and a solution page may reveal the answer.
+   - Default `thesis_expression` to `implicit`. The deck thesis may guide visual
+     grammar, emphasis, sequencing, and a subtle visual anchor, but it must not
+     appear as page copy or as a literal solution object unless the source and
+     the page's narrative role explicitly reveal it.
+   - Treat visuals as claims. An AI platform, target architecture, product,
+     outcome, or future-state scene shown on a problem page is premature
+     solution leakage even if it is not labeled in text.
    - Infer the information topology before choosing a layout. Distinguish
      shared-center relationships, causal chains, sequences, hierarchies,
      comparisons, matrices, networks, spatial systems, and evidence boards.
@@ -121,6 +134,10 @@ Deliver:
      center node, connected satellites, arrows, layers, or a controlled set of
      shapes when those elements encode real relationships. Background, scenery,
      and ornament must remain subordinate to the conclusion.
+   - Make `exact_text` the exclusive visible-copy contract. Do not promote
+     `storyline.core_thesis`, `decision_request`, `transition`, speaker notes,
+     or prompt instructions into visible text unless those words are also
+     intentionally included in `exact_text`.
    - Allow graphical richness that explains the idea: connectors, nodes,
      containers, icons, paths, and restrained color blocks. Reject graphics
      that exist only to decorate the page.
@@ -164,6 +181,9 @@ Deliver:
      executive relevance, evidence gaps, redundancy, abstraction jumps,
      chapter closure, final convergence on the decision request, and whether
      the spoken bridges read naturally in sequence.
+   - Check reveal timing. Reject a page that states or depicts a later answer
+     before the story has earned it, or that substitutes the deck thesis for
+     the source-backed page content.
    - Delete or merge any slide whose removal does not weaken the argument.
    - Record the result in `storyline_review`. Keep `status` blocked until thesis
      alignment, executive relevance, page flow, and visual consistency pass and
@@ -203,7 +223,13 @@ with a complete prompt containing:
 - asset type: complete 16:9 executive PowerPoint slide image;
 - primary request: design the entire slide as one integrated executive report
   page that is understandable without speaker narration;
-- deck thesis, slide role, audience question, and page conclusion;
+- slide narrative role, audience question, and page conclusion;
+- `thesis_expression`, `content_boundary`, and `thesis_connection`;
+- when `thesis_expression` is `implicit`, omit the deck thesis and decision
+  request from the image prompt and explicitly forbid their text or literal
+  depiction; use only the slide-specific content and permitted visual subtext;
+- when `thesis_expression` is `explicit`, include the deck thesis only when it
+  belongs to this page's source-backed argument and `exact_text` contract;
 - exact palette;
 - exact visible Chinese text, kept concise;
 - one dominant visual system on a pure white solid canvas;
@@ -227,7 +253,9 @@ that feels like a background with text pasted over it. Also reject pages where
 the visible copy is too sparse to carry the source argument, or where the
 background dominates and the core message cannot be read at contact-sheet
 thumbnail size. Also reject any page whose background is not a clean approved
-solid color or whose visual language jumps abruptly from adjacent pages. Save
+solid color or whose visual language jumps abruptly from adjacent pages. Reject
+premature solution leakage: visible thesis copy, solution objects, future-state
+architecture, or outcomes that exceed the slide's `content_boundary`. Save
 accepted PNGs into the workspace output directory, then assemble them
 full-bleed into PPTX using the Presentation skill's
 `@oai/artifact-tool` workflow or the local assembler.

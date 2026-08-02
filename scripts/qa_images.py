@@ -56,6 +56,10 @@ def review_with_kimi(
     prompt = (
         "Review this generated PowerPoint slide. "
         f"Intended message: {slide['message']}. "
+        f"Narrative role: {slide['narrative_role']}. "
+        f"Thesis expression: {slide['thesis_expression']}. "
+        f"Content boundary: {slide['content_boundary']}. "
+        f"Thesis connection: {slide['thesis_connection']}. "
         f"Required information topology: {slide['information_topology']}. "
         f"Visual reasoning: {slide['visual_reasoning']}. "
         f"Required dominant visual focus: {slide['visual_focus']}. "
@@ -65,13 +69,22 @@ def review_with_kimi(
         "small unreadable text, palette mismatch, semantic mismatch, competing "
         "visual focal points, decorative clutter, and a topology that flattens "
         "meaningful relationships into disconnected cards or table rows. The "
+        "visible copy must contain only the expected exact text; planning "
+        "labels, prompt instructions, deck-level thesis, decision request, "
+        "transitions, and speaker notes must not leak into the image. Check "
+        "every depicted object against the content boundary. When thesis "
+        "expression is implicit, reject any literal solution, target "
+        "architecture, future-state workflow, or outcome that the page has not "
+        "yet earned. The "
         "background must be a "
         f"pure solid {plan['palette']['background']} canvas with no gradient, "
         "photo, texture, pattern, glow, or scenic wallpaper. "
         'Return JSON only: {"pass": boolean, "issues": [string], '
         '"observed_text": [string], "palette_match": boolean, '
         '"solid_background": boolean, "focus_clear": boolean, '
-        '"topology_match": boolean}.'
+        '"topology_match": boolean, "exact_text_exclusive": boolean, '
+        '"content_boundary_respected": boolean, '
+        '"thesis_leakage_absent": boolean}.'
     )
     payload = {
         "model": model,

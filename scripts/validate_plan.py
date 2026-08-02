@@ -27,6 +27,7 @@ ALLOWED_COMPOSITION_MODES = {
     "overlay_panels",
 }
 ALLOWED_CLAIM_TYPES = {"fact", "inference", "proposal", "decision"}
+ALLOWED_THESIS_EXPRESSIONS = {"implicit", "explicit"}
 ALLOWED_LAYOUTS = {
     "opener",
     "overview",
@@ -218,6 +219,9 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
             "title",
             "audience_question",
             "message",
+            "narrative_role",
+            "content_boundary",
+            "thesis_connection",
             "visual_subject",
             "visual_focus",
             "information_topology",
@@ -230,6 +234,12 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
         if claim_type not in ALLOWED_CLAIM_TYPES:
             errors.append(
                 f"{prefix}.claim_type must be fact, inference, proposal, or decision"
+            )
+
+        thesis_expression = slide.get("thesis_expression")
+        if thesis_expression not in ALLOWED_THESIS_EXPRESSIONS:
+            errors.append(
+                f"{prefix}.thesis_expression must be implicit or explicit"
             )
 
         transition = slide.get("transition")
@@ -257,6 +267,15 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
             errors.append(f"{prefix}.exact_text must be a non-empty array")
         elif any(not isinstance(item, str) or not item.strip() for item in exact_text):
             errors.append(f"{prefix}.exact_text contains an empty/non-string item")
+        elif thesis_expression == "implicit" and isinstance(storyline, dict):
+            visible_text = "\n".join(exact_text)
+            for field in ("core_thesis", "decision_request"):
+                value = storyline.get(field)
+                if isinstance(value, str) and value.strip() and value.strip() in visible_text:
+                    errors.append(
+                        f"{prefix}.exact_text leaks storyline.{field} while "
+                        "thesis_expression is implicit"
+                    )
 
         image = slide.get("image")
         if not isinstance(image, str) or not image.lower().endswith(".png"):

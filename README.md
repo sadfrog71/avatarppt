@@ -12,6 +12,9 @@ It keeps chapter divider pages native to the template and inserts generated full
   and validated chapter and slide plan.
 - Records the audience question, claim type, visual focus, and page-to-page
   transition for every content slide.
+- Separates the deck-level thesis from each page's narrative role and content
+  boundary, preventing problem or evidence pages from prematurely stating or
+  depicting the later solution.
 - Chooses tables, hub-and-spoke diagrams, causal chains, flows, layers,
   comparisons, networks, or evidence boards from the information relationship
   rather than mechanically copying the source format.

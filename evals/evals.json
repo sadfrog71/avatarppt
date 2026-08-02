@@ -24,7 +24,12 @@
     {
       "id": 5,
       "prompt": "把数据沉睡、经验依赖、被动响应、服务承压、知识散落五类结构性瓶颈做成一页老板层PPT。源材料是表格，但五类问题都围绕企业运营能力展开，不要机械照抄表格，也不要做成五张互不相关的卡片。",
-      "expected_output": "The agent identifies a shared-center relationship, chooses a restrained hub-and-spoke or equivalent connected topology around enterprise operating capability, preserves the five problem labels and impacts, uses a clean white canvas with meaningful connectors and controlled color, and avoids both decorative excess and overly plain tabular treatment."
+      "expected_output": "The agent identifies a shared-center relationship, chooses a restrained connected topology around the current operating constraint, preserves the five problem labels and impacts, and uses a clean white canvas with meaningful connectors and controlled color. If the deck-level thesis later recommends an enterprise agent platform, this diagnosis page keeps that answer implicit: it does not write, draw, or place the platform at the center, and it avoids both decorative excess and overly plain tabular treatment."
+    },
+    {
+      "id": 6,
+      "prompt": "整套汇报的中心思想是建设企业自己的智能体平台，但这一页只是背景问题页。请根据我提供的五类瓶颈做视觉表达，不要把中心思想直接写到页面上。",
+      "expected_output": "The agent separates the deck-level thesis from the page-level claim, marks the diagnosis page as thesis_expression=implicit, defines a source-backed content boundary, and uses the thesis only as non-literal visual subtext and transition logic. The generated slide contains only the five bottlenecks and their current impacts, with no agent-platform copy, platform illustration, target architecture, promised outcome, or other premature solution leakage."
     }
   ]
 }

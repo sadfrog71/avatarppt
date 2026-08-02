@@ -80,6 +80,10 @@
           "audience_question": "一期建设是否已经产生可验证的业务价值？",
           "message": "核心流程效率得到可量化提升",
           "claim_type": "fact",
+          "narrative_role": "成效证据页：证明一期建设已产生可验证价值",
+          "thesis_expression": "implicit",
+          "content_boundary": "仅呈现用户提供的前后效率证据；不展示后续平台方案、目标架构或决策请求",
+          "thesis_connection": "通过可量化证据增强建设主张的可信度，但不直接复述整套主旨",
           "layout_type": "metrics",
           "information_topology": "comparison",
           "exact_text": [

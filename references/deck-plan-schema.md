@@ -93,6 +93,10 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
       "audience_question": "一期建设是否已经产生可验证的业务价值？",
       "message": "核心流程效率得到可量化提升",
       "claim_type": "fact",
+      "narrative_role": "成效证据页：证明一期建设已产生可验证价值",
+      "thesis_expression": "implicit",
+      "content_boundary": "仅呈现用户提供的前后效率证据；不展示后续平台方案、目标架构或决策请求",
+      "thesis_connection": "通过可量化证据增强建设主张的可信度，但不直接复述整套主旨",
       "layout_type": "metrics",
       "information_topology": "comparison",
       "exact_text": [
@@ -139,6 +143,17 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
 - Put real quantitative claims in `facts`; do not synthesize unsupported values.
 - Use `claim_type` to distinguish `fact`, `inference`, `proposal`, and
   `decision`. Do not write an inference or proposal as a fact.
+- Write `narrative_role` in natural language to state what the page does in the
+  argument. Do not use it as another rigid layout enum.
+- Set `thesis_expression` to `implicit` by default. Use `explicit` only when the
+  page intentionally reveals the deck thesis and that claim belongs to the
+  page's source-backed argument.
+- Write `content_boundary` as a semantic fence covering both copy and imagery:
+  what the page may show and what later solution, future-state, outcome, or
+  decision content must remain deferred.
+- Write `thesis_connection` to explain how the page advances the deck thesis
+  through evidence, tension, continuity, or transition. Thesis alignment does
+  not require repeating or literally illustrating the thesis.
 - Make `audience_question` the question the page answers and `message` the
   conclusion. Except for cover, chapter, and closing pages, prefer a
   conclusion-led `title` over a topic label.
@@ -157,6 +172,12 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
   causally rather than only share a topic.
 - Put explanations needed for delivery in `speaker_notes`; keep generated image
   text concise.
+- Treat `exact_text` as the exclusive visible-copy contract. Do not render
+  `core_thesis`, `decision_request`, planning field names, transitions, or
+  speaker notes unless the intended words are also present in `exact_text`.
+- For `thesis_expression = implicit`, omit the deck thesis and decision request
+  from the image prompt. Reject literal depictions of deferred solutions even
+  when they contain no text; visual objects also make claims.
 - Default `palette.background` to `#FFFFFF`. Use a pure solid-color canvas with
   no background photo, texture, pattern, glow, or scenic wallpaper unless the
   user explicitly requests a different background treatment. Allow restrained

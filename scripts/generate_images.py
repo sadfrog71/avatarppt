@@ -42,15 +42,35 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
     else:
         exact_text = " | ".join(slide["exact_text"])
         text_constraint = (
-            f"Render only this concise text, exactly as written: {exact_text}."
+            f"Render only this concise text, exactly as written: {exact_text}. "
+            "Do not render planning labels, prompt instructions, the deck "
+            "objective, transitions, speaker notes, or any other copy."
+        )
+    if slide["thesis_expression"] == "explicit":
+        thesis_context = (
+            f"This page intentionally reveals the deck thesis: "
+            f"{storyline['core_thesis']}. It may appear visually only within "
+            "the page content boundary, and may appear as text only when the "
+            "same wording is present in exact_text. "
+        )
+    else:
+        thesis_context = (
+            "The deck thesis and decision request are intentionally withheld "
+            "on this page. Do not render them as text and do not literally "
+            "depict the deferred solution, future-state architecture, promised "
+            "outcome, or decision. Use only the page-specific evidence and "
+            "permitted non-literal visual subtext. "
         )
     structured_prompt = (
         "Create one complete 16:9 presentation slide image. "
         f"Audience: {plan.get('audience', 'executive audience')}. "
         f"Objective: {plan.get('objective', '')}. "
-        f"Deck thesis: {storyline['core_thesis']}. "
-        f"Decision request: {storyline['decision_request']}. "
         f"Slide role: {slide['layout_type']}. "
+        f"Narrative role: {slide['narrative_role']}. "
+        f"Thesis expression: {slide['thesis_expression']}. "
+        f"Content boundary: {slide['content_boundary']}. "
+        f"Thesis connection: {slide['thesis_connection']}. "
+        f"{thesis_context}"
         f"Audience question: {slide['audience_question']}. "
         f"Message: {slide['message']}. "
         f"Claim type: {slide['claim_type']}. "
@@ -58,7 +78,8 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
         f"Visual subject: {slide['visual_subject']}. "
         f"Dominant visual focus: {slide['visual_focus']}. "
         f"Visual reasoning: {slide['visual_reasoning']}. "
-        f"Transition to next page: {slide['transition']['to_next']}. "
+        f"Non-visible transition cue for composition only: "
+        f"{slide['transition']['to_next']}. "
         f"Verified facts only: {facts}. "
         f"Exact palette: {palette_description(plan['palette'])}. "
         f"Visual style: {generation.get('style', 'clean executive presentation')}. "

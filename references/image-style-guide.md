@@ -6,6 +6,7 @@ This guide defines the full-slide PNG style used for content pages.
 
 - [Visual Direction](#visual-direction)
 - [Executive Visual Hierarchy](#executive-visual-hierarchy)
+- [Narrative Role And Content Boundary](#narrative-role-and-content-boundary)
 - [Information Topology First](#information-topology-first)
 - [Palette](#palette)
 - [Typography](#typography)
@@ -57,6 +58,33 @@ and typography stable. Vary composition according to the reasoning: diagnose,
 compare, explain, prove, sequence, or decide. Adjacent pages that discuss the
 same system should retain a visual anchor; a new visual language should signal a
 real narrative shift.
+
+## Narrative Role And Content Boundary
+
+Design from the page-level argument, not directly from the deck-level thesis.
+The thesis is a north star for selection, rhythm, visual continuity, and reveal
+timing; it is not a default headline, center label, hero object, or diagram.
+
+- Use `narrative_role` to decide what the page is allowed to accomplish.
+- Use `content_boundary` as a semantic fence for both text and imagery. Visual
+  objects are claims: depicting a platform, target architecture, future-state
+  workflow, or outcome adds content even when no label is attached.
+- When `thesis_expression` is `implicit`, render only the page message and
+  source-backed evidence. Let the deck thesis influence subtle visual grammar,
+  such as a recurring line language, a controlled gap, an unresolved center,
+  or a transition cue. Do not write or literally illustrate the thesis.
+- When `thesis_expression` is `explicit`, reveal the thesis only if the page is
+  the intended strategic-judgment, solution, or decision moment and the words
+  belong in `exact_text`.
+- Keep `exact_text` exclusive. Do not render prompt labels, deck-planning
+  fields, speaker notes, transition copy, or the decision request unless they
+  appear in `exact_text`.
+
+Example: if a diagnosis page lists five structural bottlenecks and the later
+deck answer is an enterprise agent platform, show the five bottlenecks as one
+connected operating constraint. Do not put an agent platform in the center.
+The solution may be foreshadowed only through a reusable visual anchor that
+does not identify or promise the solution.
 
 ## Information Topology First
 
@@ -204,7 +232,8 @@ Default to one final generated version per slide. Pick the page recipe automatic
 Do not generate several template/style alternatives unless the user asks for options. Regenerate only to fix Chinese accuracy, duplicate text, text overlap, cropped content, business meaning, or visual quality.
 
 Choose the recipe from the slide's `audience_question`, `message`,
-`claim_type`, `information_topology`, `visual_focus`, and `visual_reasoning`,
+`claim_type`, `narrative_role`, `thesis_expression`, `content_boundary`,
+`information_topology`, `visual_focus`, and `visual_reasoning`,
 not from the source format or a desire to make every page look different. The
 title states the conclusion; the dominant visual system proves or explains it;
 supporting elements provide evidence.
@@ -220,7 +249,7 @@ Prompt variables:
 Generic prompt pattern:
 
 ```text
-16:9 full-slide Chinese executive PowerPoint page for {domain}. Audience question: {audience_question}. Conclusion: {message}. Use a pure white solid background with no texture, pattern, photo, or scenic wallpaper. Information topology: {information_topology}. Visual reasoning: {visual_reasoning}. Create one dominant visual system: {visual_focus}. Allow restrained nodes, connectors, arrows, containers, rings, icons, and pale color blocks when they encode real relationships. Exact palette {palette}, enterprise report style, generous whitespace, stable grid, render this exact concise Chinese text: {exact_chinese_text}, no text overlap, no duplicated text, no cropped text, no malformed Chinese characters, no logos
+16:9 full-slide Chinese executive PowerPoint page for {domain}. Narrative role: {narrative_role}. Audience question: {audience_question}. Page conclusion: {message}. Thesis expression: {thesis_expression}. Content boundary: {content_boundary}. Thesis connection: {thesis_connection}. Use a pure white solid background with no texture, pattern, photo, or scenic wallpaper. Information topology: {information_topology}. Visual reasoning: {visual_reasoning}. Create one dominant visual system: {visual_focus}. Allow restrained nodes, connectors, arrows, containers, rings, icons, and pale color blocks when they encode real relationships. Exact palette {palette}, enterprise report style, generous whitespace, stable grid. Render only this exact concise Chinese text: {exact_chinese_text}. Do not render planning labels, prompt instructions, or deferred solution content. No text overlap, no duplicated text, no cropped text, no malformed Chinese characters, no logos.
 ```
 
 If the generated result contains Chinese errors or collisions, tighten the copy and regenerate the image. Do not patch around major text defects by inserting the faulty image into the PPT.
@@ -251,9 +280,13 @@ Chinese text, icons, KPI figures, scene, and hierarchy must be conceived as one
 whole. Do not create a background first and then place cards or text on top.
 Palette: {palette}.
 Topic: {slide_topic}.
-Core message: {message}.
+Page message: {message}.
 Audience question: {audience_question}.
 Claim type: {claim_type}.
+Narrative role: {narrative_role}.
+Thesis expression: {thesis_expression}.
+Content boundary: {content_boundary}.
+Thesis connection: {thesis_connection}.
 Exact visible Chinese text: {concise_text}.
 Canvas: pure white solid background. No background gradient, photo, texture,
 pattern, glow, or decorative scene. Subtle shading inside semantic nodes is
@@ -264,6 +297,9 @@ Dominant visual system: {visual_focus}.
 Composition direction: {specific comparison / relationship / flow / architecture / evidence board}.
 Context continuity: inherit {visual_anchor_from_previous} where useful, while
 preparing the audience for {transition_to_next}.
+If thesis expression is implicit: do not include the deck thesis or decision
+request in the image prompt; do not render or literally depict the deferred
+answer. Use the thesis connection only as non-literal visual subtext.
 Avoid: watermark, logo, pseudo text, invented claims, inflated slogans,
 oversized opaque cards, dense bullet pages, scenic wallpaper, decorative 3D
 objects, glassmorphism, excessive ornament, disconnected cards that hide real
@@ -303,6 +339,10 @@ no watermark, no logo, no stock photo, no realistic photo, no cartoon, no dark c
 - No label, title, icon, card, chart annotation, or footer text overlaps another element.
 - No text is cropped at the slide edge or hidden behind decorative elements.
 - Key business terms match the user's source material.
+- Visible copy contains only `exact_text`; planning labels and deck-level
+  thesis text do not leak onto implicit pages.
+- Every semantic object stays inside `content_boundary`; diagnosis and evidence
+  pages do not prematurely depict the later solution or future state.
 - Palette matches the exact hex values in `deck-plan.json`.
 - The image subject clearly matches the user's topic instead of defaulting to factories or water scenes.
 - No background texture competes with the main content.
