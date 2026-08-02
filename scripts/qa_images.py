@@ -56,12 +56,22 @@ def review_with_kimi(
     prompt = (
         "Review this generated PowerPoint slide. "
         f"Intended message: {slide['message']}. "
+        f"Required information topology: {slide['information_topology']}. "
+        f"Visual reasoning: {slide['visual_reasoning']}. "
+        f"Required dominant visual focus: {slide['visual_focus']}. "
         f"Expected exact text: {json.dumps(slide['exact_text'], ensure_ascii=False)}. "
         f"Required palette: {palette_description(plan['palette'])}. "
         "Check text corruption, missing or duplicated labels, overlap, clipping, "
-        "small unreadable text, palette mismatch, and semantic mismatch. "
+        "small unreadable text, palette mismatch, semantic mismatch, competing "
+        "visual focal points, decorative clutter, and a topology that flattens "
+        "meaningful relationships into disconnected cards or table rows. The "
+        "background must be a "
+        f"pure solid {plan['palette']['background']} canvas with no gradient, "
+        "photo, texture, pattern, glow, or scenic wallpaper. "
         'Return JSON only: {"pass": boolean, "issues": [string], '
-        '"observed_text": [string], "palette_match": boolean}.'
+        '"observed_text": [string], "palette_match": boolean, '
+        '"solid_background": boolean, "focus_clear": boolean, '
+        '"topology_match": boolean}.'
     )
     payload = {
         "model": model,

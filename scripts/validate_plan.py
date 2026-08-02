@@ -20,6 +20,13 @@ REQUIRED_PALETTE_KEYS = (
 )
 ALLOWED_PROVIDERS = {"openai", "minimax"}
 ALLOWED_MINIMAX_REGIONS = {"cn", "global"}
+ALLOWED_COMPOSITION_MODES = {
+    "direct_imagegen_slide",
+    "designed_canvas",
+    "ui_designer",
+    "overlay_panels",
+}
+ALLOWED_CLAIM_TYPES = {"fact", "inference", "proposal", "decision"}
 ALLOWED_LAYOUTS = {
     "opener",
     "overview",
@@ -39,6 +46,58 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
         errors.append("top-level 'output' is required")
     if not plan.get("cover_title"):
         errors.append("top-level 'cover_title' is required")
+
+    storyline = plan.get("storyline")
+    if not isinstance(storyline, dict):
+        errors.append("top-level 'storyline' must be an object")
+    else:
+        for field in ("core_thesis", "decision_request"):
+            if not isinstance(storyline.get(field), str) or not storyline[field].strip():
+                errors.append(f"storyline.{field} is required")
+        audience_priority = storyline.get("audience_priority")
+        if not isinstance(audience_priority, list) or not audience_priority:
+            errors.append("storyline.audience_priority must be a non-empty array")
+        elif any(
+            not isinstance(item, str) or not item.strip()
+            for item in audience_priority
+        ):
+            errors.append(
+                "storyline.audience_priority contains an empty/non-string item"
+            )
+        story_arc = storyline.get("story_arc")
+        if not isinstance(story_arc, list) or not 3 <= len(story_arc) <= 6:
+            errors.append("storyline.story_arc must contain 3 to 6 moves")
+        else:
+            for move_index, move in enumerate(story_arc):
+                prefix = f"storyline.story_arc[{move_index}]"
+                if not isinstance(move, dict):
+                    errors.append(f"{prefix} must be an object")
+                    continue
+                for field in ("move", "question", "answer"):
+                    if not isinstance(move.get(field), str) or not move[field].strip():
+                        errors.append(f"{prefix}.{field} is required")
+
+    storyline_review = plan.get("storyline_review")
+    if not isinstance(storyline_review, dict):
+        errors.append("top-level 'storyline_review' must be an object")
+    else:
+        if storyline_review.get("status") != "pass":
+            errors.append("storyline_review.status must be 'pass' before generation")
+        for field in (
+            "thesis_alignment",
+            "executive_relevance",
+            "flow",
+            "visual_consistency",
+        ):
+            if not isinstance(storyline_review.get(field), str) or not storyline_review[
+                field
+            ].strip():
+                errors.append(f"storyline_review.{field} is required")
+        open_issues = storyline_review.get("open_issues")
+        if not isinstance(open_issues, list):
+            errors.append("storyline_review.open_issues must be an array")
+        elif open_issues:
+            errors.append("storyline_review.open_issues must be empty before generation")
 
     palette = plan.get("palette")
     if not isinstance(palette, dict):
@@ -68,6 +127,37 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
             not isinstance(source_directory, str) or not source_directory.strip()
         ):
             errors.append("image_generation.source_directory must be a non-empty path")
+        composition_mode = generation.get("composition_mode", "overlay_panels")
+        if composition_mode not in ALLOWED_COMPOSITION_MODES:
+            errors.append("image_generation.composition_mode is not supported")
+        if generation.get("background_mode", "solid") != "solid":
+            errors.append("image_generation.background_mode must be 'solid'")
+        allow_nonwhite = generation.get("allow_nonwhite_background", False)
+        if not isinstance(allow_nonwhite, bool):
+            errors.append(
+                "image_generation.allow_nonwhite_background must be a boolean"
+            )
+        palette_config = plan.get("palette")
+        background = (
+            palette_config.get("background")
+            if isinstance(palette_config, dict)
+            else None
+        )
+        if (
+            isinstance(background, str)
+            and background.upper() != "#FFFFFF"
+            and allow_nonwhite is not True
+        ):
+            errors.append(
+                "palette.background must be #FFFFFF unless "
+                "image_generation.allow_nonwhite_background is true"
+            )
+        if composition_mode == "direct_imagegen_slide" and generation.get(
+            "local_text_overlay"
+        ):
+            errors.append(
+                "direct_imagegen_slide cannot use image_generation.local_text_overlay"
+            )
         if provider == "openai":
             size = str(generation.get("size", ""))
             if not re.fullmatch(r"\d+x\d+|auto", size):
@@ -124,9 +214,39 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
         else:
             seen_ids.add(slide_id)
 
-        for field in ("title", "message", "visual_subject"):
+        for field in (
+            "title",
+            "audience_question",
+            "message",
+            "visual_subject",
+            "visual_focus",
+            "information_topology",
+            "visual_reasoning",
+        ):
             if not isinstance(slide.get(field), str) or not slide[field].strip():
                 errors.append(f"{prefix}.{field} is required")
+
+        claim_type = slide.get("claim_type")
+        if claim_type not in ALLOWED_CLAIM_TYPES:
+            errors.append(
+                f"{prefix}.claim_type must be fact, inference, proposal, or decision"
+            )
+
+        transition = slide.get("transition")
+        if not isinstance(transition, dict):
+            errors.append(f"{prefix}.transition must be an object")
+        else:
+            for field in ("from_previous", "to_next"):
+                if not isinstance(transition.get(field), str) or not transition[
+                    field
+                ].strip():
+                    errors.append(f"{prefix}.transition.{field} is required")
+
+        speaker_notes = slide.get("speaker_notes")
+        if speaker_notes is not None and (
+            not isinstance(speaker_notes, str) or not speaker_notes.strip()
+        ):
+            errors.append(f"{prefix}.speaker_notes must be a non-empty string")
 
         layout = slide.get("layout_type")
         if layout not in ALLOWED_LAYOUTS:

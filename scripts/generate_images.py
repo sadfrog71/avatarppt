@@ -27,6 +27,7 @@ MINIMAX_ENDPOINTS = {
 
 def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
     generation = plan["image_generation"]
+    storyline = plan["storyline"]
     facts = "; ".join(slide.get("facts", [])) or "no unsupported numeric claims"
     negative = generation.get(
         "negative_prompt",
@@ -47,15 +48,27 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
         "Create one complete 16:9 presentation slide image. "
         f"Audience: {plan.get('audience', 'executive audience')}. "
         f"Objective: {plan.get('objective', '')}. "
+        f"Deck thesis: {storyline['core_thesis']}. "
+        f"Decision request: {storyline['decision_request']}. "
         f"Slide role: {slide['layout_type']}. "
+        f"Audience question: {slide['audience_question']}. "
         f"Message: {slide['message']}. "
+        f"Claim type: {slide['claim_type']}. "
+        f"Information topology: {slide['information_topology']}. "
         f"Visual subject: {slide['visual_subject']}. "
+        f"Dominant visual focus: {slide['visual_focus']}. "
+        f"Visual reasoning: {slide['visual_reasoning']}. "
+        f"Transition to next page: {slide['transition']['to_next']}. "
         f"Verified facts only: {facts}. "
         f"Exact palette: {palette_description(plan['palette'])}. "
         f"Visual style: {generation.get('style', 'clean executive presentation')}. "
         f"{text_constraint} "
-        "Use clear hierarchy, generous margins, and a coherent visual subject "
-        "tied to the message. "
+        f"Use a pure solid {plan['palette']['background']} background with no "
+        "background photo, texture, pattern, glow, or scenic wallpaper. Allow "
+        "restrained nodes, connectors, paths, containers, icons, and pale color "
+        "blocks when they encode relationships. Use one dominant visual system, "
+        "clear hierarchy, generous margins, and a restrained style suitable for "
+        "an executive decision meeting. "
         f"Avoid: {negative}."
     )
     custom_prompt = str(slide.get("prompt", "")).strip()

@@ -4,17 +4,27 @@
     {
       "id": 1,
       "prompt": "把这份项目大纲整理成管理层汇报PPT。使用墨绿、深青、金色强调色，内容页用 GPT Image 生成，模板页也改成相同色系。",
-      "expected_output": "A validated deck plan, palette-injected GPT Image prompts, recolored native template pages, generated full-bleed images, and a PPTX with inventory."
+      "expected_output": "A thesis-led management deck that identifies the decision request, rewrites the source into a causal story arc, records each slide's audience question and transition, selects a restrained information topology on a solid white canvas, validates the plan, and only then generates and assembles the PPTX."
     },
     {
       "id": 2,
       "prompt": "把这份材料整理成3个章节，每章2页，使用 MiniMax image-01 生图，指定藏蓝、银灰、亮青色系。",
-      "expected_output": "A three-section deck plan using the MiniMax adapter, six palette-controlled image prompts, validated 16:9 PNGs, and an assembled PPTX."
+      "expected_output": "A three-section causal storyline with a central thesis and explicit decision request, six connected slide arguments with restrained palette-controlled prompts on solid backgrounds, validated 16:9 PNGs, and an assembled PPTX."
     },
     {
       "id": 3,
       "prompt": "做一个技术创新点PPT：AI决策、全流程管控、平台化运营。GPT Image 负责生图，Kimi 检查中文、重叠、裁切和色系一致性。",
-      "expected_output": "A deck with GPT Image content slides, a Kimi visual QA report, failed-slide regeneration when needed, and assembly blocked until QA passes."
+      "expected_output": "A coherent innovation narrative rather than three disconnected topic pages, with fact/inference/proposal labels, explicit transitions, relationship-aware visual structures, GPT Image content slides, a Kimi visual QA report, and assembly blocked until narrative and visual QA pass."
+    },
+    {
+      "id": 4,
+      "prompt": "这份材料很散，帮我做成给老板汇报的图片PPT。现在的版本太花哨、背景抢戏、每页跳得很快。先提炼中心思想，不确定的地方问我。",
+      "expected_output": "The agent first resolves one core thesis and one decision request, asks a single focused question only if competing theses would materially change the deck, produces a senior-solution-expert storyline walkthrough with page bridges, and generates visually calm but not empty slides with relationship-aware diagrams on pure white backgrounds."
+    },
+    {
+      "id": 5,
+      "prompt": "把数据沉睡、经验依赖、被动响应、服务承压、知识散落五类结构性瓶颈做成一页老板层PPT。源材料是表格，但五类问题都围绕企业运营能力展开，不要机械照抄表格，也不要做成五张互不相关的卡片。",
+      "expected_output": "The agent identifies a shared-center relationship, chooses a restrained hub-and-spoke or equivalent connected topology around enterprise operating capability, preserves the five problem labels and impacts, uses a clean white canvas with meaningful connectors and controlled color, and avoids both decorative excess and overly plain tabular treatment."
     }
   ]
 }
