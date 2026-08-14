@@ -1,4 +1,4 @@
 interface:
   display_name: "Image Avatar PPT"
-  short_description: "把大纲提炼成主旨清晰、叙事连贯、关系可视的老板层图片 PPT"
-  default_prompt: "Use $imageavatarppt to turn my outline into a thesis-led executive PPT with coherent transitions and relationship-aware visuals."
+  short_description: "生成证据可追溯、叙事连贯、弱化 AI 套路的管理层图片 PPT"
+  default_prompt: "Use $imageavatarppt to turn my outline into a source-aware executive PPT with editable native titles, coherent transitions, varied editorial layouts, and anti-template QA."

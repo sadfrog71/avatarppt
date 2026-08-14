@@ -8,7 +8,13 @@ import math
 from pathlib import Path
 from typing import Any
 
-from deck_utils import iter_slides, load_plan, resolve_path
+from deck_utils import (
+    image_rendered_text,
+    iter_slides,
+    load_plan,
+    resolve_path,
+    resolved_title_render_mode,
+)
 from validate_plan import validate_plan
 
 
@@ -173,27 +179,40 @@ def compose_slide(
     base = Image.blend(base, visual, max(0.0, min(1.0, visual_opacity))).convert("RGBA")
     draw = ImageDraw.Draw(base, "RGBA")
 
-    draw.rectangle((29, 0, CANVAS[0], 144), fill=(255, 255, 255, header_alpha))
+    title_render_mode = resolved_title_render_mode(plan, slide)
+    rendered_text = image_rendered_text(plan, slide)
+
+    if title_render_mode != "none":
+        draw.rectangle((29, 0, CANVAS[0], 144), fill=(255, 255, 255, header_alpha))
     draw.rectangle((0, 0, 18, CANVAS[1]), fill=(*primary, 255))
     draw.rectangle((18, 0, 29, CANVAS[1]), fill=(*accent, 255))
-    draw.rectangle((48, 36, 1232, 126), fill=(255, 255, 255, header_alpha))
-    draw.rectangle((48, 126, 214, 132), fill=(*accent, 255))
+    if title_render_mode != "none":
+        draw.rectangle((48, 36, 1232, 126), fill=(255, 255, 255, header_alpha))
 
-    exact_text = slide["exact_text"]
-    title = exact_text[0]
     title_font_path = find_font(True)
     body_font_path = find_font(False)
     bold_font_path = find_font(True)
-    title_size = 38
-    title_font = ImageFont.truetype(title_font_path, title_size)
-    while draw.textlength(title, font=title_font) > 1134 and title_size > 26:
-        title_size -= 1
-        title_font = ImageFont.truetype(title_font_path, title_size)
-    draw.text((66, 58), title, font=title_font, fill=(*secondary, 255))
+    items = list(rendered_text)
+    if title_render_mode == "image":
+        declared_title = str(slide.get("title", ""))
+        title = declared_title if declared_title in items else (items[0] if items else "")
+        if title:
+            items.remove(title)
+            draw.rectangle((48, 126, 214, 132), fill=(*accent, 255))
+            title_size = 38
+            title_font = ImageFont.truetype(title_font_path, title_size)
+            while draw.textlength(title, font=title_font) > 1134 and title_size > 26:
+                title_size -= 1
+                title_font = ImageFont.truetype(title_font_path, title_size)
+            draw.text((66, 58), title, font=title_font, fill=(*secondary, 255))
 
-    items = exact_text[1:]
     columns = 1 if len(items) <= 6 else 2
-    left, top, right, bottom = 48, 154, 1232, 674
+    left, top, right, bottom = (
+        48,
+        154 if title_render_mode != "none" else 48,
+        1232,
+        674,
+    )
     if designed_canvas and columns == 1:
         anchor = str(generation.get("single_column_anchor", "left"))
         width = int(generation.get("single_column_width", 720))

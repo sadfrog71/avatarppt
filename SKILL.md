@@ -1,6 +1,6 @@
 ---
 name: imageavatarppt
-description: Generate thesis-led, chapter-based executive PowerPoint decks from Chinese or English outlines using the bundled Parallel Digital template, restrained palette-controlled full-slide images, explicit page-to-page transitions, and optional multimodal visual QA. Use when Codex must turn loose material into a management, executive, proposal, strategy, steering-committee, or major-project deck; identify the central judgment and decision request; plan a coherent storyline; generate 16:9 content images with OpenAI GPT Image or MiniMax; review images with Kimi Vision; recolor the template; and assemble a final PPTX.
+description: Generate thesis-led, chapter-based executive PowerPoint decks from Chinese or English outlines using the bundled Parallel Digital template, source-aware editorial layouts, restrained palette-controlled full-slide images, explicit page-to-page transitions, static anti-template audits, and optional multimodal visual QA. Use when Codex must turn loose material into a management, executive, proposal, strategy, steering-committee, or major-project deck; identify the central judgment and decision request; reduce formulaic AI copy and generic AI visual devices; generate 16:9 content images with OpenAI GPT Image or MiniMax; review images and deck rhythm with Kimi Vision; recolor the template; and assemble a final PPTX.
 ---
 
 # Image Avatar PPT
@@ -37,6 +37,82 @@ Infer these from the request and source outline. Ask only for material choices t
 If the user provides only a color name, derive a balanced six-color palette,
 keep `background` at `#FFFFFF`, and record the exact hex values in the plan.
 
+## Calibrated Management-Deck Defaults
+
+Apply these defaults when the audience is a group executive team or another
+mostly non-IT decision-making audience. They capture the quality bar established
+through recent water-utility executive-deck work and should be treated as
+planning and QA requirements, not optional style suggestions.
+
+- **Visual posture:** Use a restrained, industry-appropriate technology
+  language: solid white canvas by default, a clear brand hierarchy, controlled
+  accents, crisp lines, quiet object-level shading, and high-contrast
+  typography. The result should feel mature, professional, and suitable for a
+  group-level report. Avoid cyberpunk, marketing-hero, decorative-card,
+  scenic-background, or one-note gradient treatments.
+- **Main-point visibility:** The page title and the largest text block must
+  carry the page's conclusion or decision point. Do not demote the reason for
+  change, the industry-specific judgment, or the intended management outcome to
+  tiny annotations. An annotation may explain a point; it may not replace the
+  point.
+- **Text-to-visual balance:** For substantive content pages, visible text should
+  normally occupy about 30%-45% of the usable content area, with 30% as the
+  minimum target for an argument page. Use the remaining area for one dominant
+  diagram, comparison, process, matrix, or evidence structure. Treat this as a
+  readability guardrail rather than a pixel-perfect quota; a cover, chapter
+  divider, or architecture page may differ. Compared with a sparse AI-generated
+  draft, enrich the visible content by roughly 10%-20%, but do not fill the page
+  with paragraphs or tiny labels.
+- **Readable evidence:** A substantive page should usually contain one
+  conclusion-led title, 2-4 short supporting statements or evidence points, and
+  one visual system that explains their relationship. Do not put the whole
+  source outline in speaker notes. Put only the spoken expansion, caveats, and
+  examples in notes. If the argument still depends heavily on narration after
+  this balance, split the page.
+- **Editorial authorship:** Preserve the solid, quiet canvas, but do not make
+  every page a polished infographic. Prefer source screenshots, original
+  charts, plain tables, annotated evidence, and native diagrams before generic
+  illustration. Use icons, circular badges, rounded cards, central hubs,
+  decorative arrows, isometric scenes, and fake dashboards only when the
+  content requires them. Do not use those elements to fill whitespace.
+- **Copy rhythm:** Vary title forms across facts, observations, decisions,
+  questions, and concise topic labels. Treat contrast formulas such as
+  “不是……而是……”, “从……到……”, and “先……再……” as occasional devices, not the
+  default voice. Preserve a formulaic title only when its contrast is genuinely
+  the argument or the user supplied it.
+- **Non-IT translation:** Lead with business effect, operating change,
+  management value, and replication conditions. Move implementation details
+  behind the business judgment. When a technical term is necessary, add a
+  short plain-language gloss at first use. Do not let framework names, model
+  names, data pipelines, or platform layers become the page's headline unless
+  the audience explicitly asks for them.
+- **Domain specificity:** Do not use generic “AI can improve efficiency” copy.
+  Show what is specific to the subject, audience, and operating context. When
+  the source raises a comparison with another sector, make the comparison a
+  visible, evidence-backed argument rather than leaving it as an implied
+  background assumption.
+- **Pagination:** Estimate pages from information density and narrative
+  completeness instead of forcing every deck into an arbitrary count. If the
+  template catalogue cannot express the required chapter or content structure,
+  use a blank/custom deck or an editable directory rather than deleting needed
+  content.
+- **Architecture and matrix pages:** Make the information hierarchy explicit.
+  Use topology, connectors, labels, and short descriptions to explain real
+  relationships. Do not let a diagram become a decorative collection of cards;
+  every meaningful node should have a clear business role when the page needs
+  that explanation.
+- **Scenario consistency:** When the user replaces a scenario, update every
+  related matrix, architecture, workflow, result, and replication page. Do not
+  leave stale labels from an earlier draft. Keep terminology synchronized across
+  all pages that describe the same scenario or workflow.
+- **Image quality and migration:** Generate content images at `2048x1152` or
+  higher when possible, keep 16:9, and inspect both the PNG and a rendered PPTX.
+  Reject blur, low-resolution Chinese, malformed characters, clipping,
+  overlap, unreadable small text, or a visual that feels like a background with
+  text pasted on top. When template integration reduces clarity, provide a
+  clean blank-deck version with the same page order and chapter structure so
+  the user can migrate pages without accepting degraded assets.
+
 ## Output Contract
 
 Deliver:
@@ -46,6 +122,8 @@ Deliver:
   and page-to-page logic before paid generation.
 - One generated PNG per content slide.
 - `contact-sheet.png` showing all content slides in order for deck-level review.
+- A static style-audit JSON covering title formulas, copy density, repeated
+  layout families, declared source material, and common AI-default devices.
 - `image-qa.json` when Kimi QA is enabled.
 - Final `.pptx`.
 - Slide inventory JSON generated by the assembler.
@@ -97,6 +175,12 @@ Deliver:
      not present an inference or proposal as established fact.
    - Use the `because / but / therefore` test. Each page needs evidence, a
      remaining tension, or a reason the next page must follow.
+   - Alternate title forms intentionally. Read all titles as a sequence and
+     rewrite repeated “不是……而是……”, “从……到……”, “先……再……” structures unless
+     the contrast is source-backed and necessary.
+   - Choose the visual source before choosing decorative elements. Record real
+     screenshots, photos, charts, tables, or documents that can carry the page;
+     do not replace source evidence with a synthetic dashboard or illustration.
    - Add concise `speaker_notes` when the spoken explanation matters; do not
      force the full narrative into generated image text.
    - Never invent metrics, customer names, dates, or evidence.
@@ -108,6 +192,20 @@ Deliver:
 
 3. Create `deck-plan.json`.
    - Follow `references/deck-plan-schema.md`.
+   - For new plans, declare `authorship`, plus each slide's `visual_source`,
+     `source_asset_refs`, `layout_family`, and `graphic_devices`. These fields
+     improve static and visual QA; older plans remain valid without them.
+   - For new plans, default content slides to `title_render_mode=native`.
+     Generated images must reserve a clean title zone without rendering a
+     title, title placeholder, or pseudo-text. The assembler adds the real
+     title as editable PowerPoint text. Use `image` only when the user explicitly
+     needs the title integrated into the bitmap; use `none` for an intentional
+     untitled page. Older plans without `authorship` keep image-rendered titles
+     for compatibility.
+   - For `source_evidence` or `mixed` pages, inspect the actual source assets and
+     use an asset-aware ImageGen edit/reference call or a native/local composer.
+     Do not pass only the asset filename to a text-only generation call and let
+     the model reconstruct a synthetic screenshot, chart, photo, or document.
    - Choose a page role for every content slide: `opener`, `overview`, `metrics`, `process`, `system`, `comparison`, `roadmap`, or `custom`.
    - For image-based PPT requests where the user asks ImageGen / GPT Image /
      Codex image generation to output the PPT pages themselves, prefer
@@ -134,7 +232,8 @@ Deliver:
      center node, connected satellites, arrows, layers, or a controlled set of
      shapes when those elements encode real relationships. Background, scenery,
      and ornament must remain subordinate to the conclusion.
-   - Make `exact_text` the exclusive visible-copy contract. Do not promote
+   - Make `exact_text` the exclusive image-rendered-copy contract. Do not
+     duplicate a `native` title in `exact_text`, and do not promote
      `storyline.core_thesis`, `decision_request`, `transition`, speaker notes,
      or prompt instructions into visible text unless those words are also
      intentionally included in `exact_text`.
@@ -167,9 +266,9 @@ Deliver:
      full-width opaque headers, large text panels, dense card stacks, or
      immersive background art. Do not preserve every outline sentence as
      visible bullet text in this mode.
-   - Without local text overlay, reduce image-rendered copy to a title plus
-     concise labels. Put long explanations in speaker notes or a separate
-     editable-text workflow.
+   - Without local text overlay, reduce image-rendered copy to concise labels
+     and proof points. Keep the title native by default. Put long explanations
+     in speaker notes or a separate editable-text workflow.
    - Write `exact_text` as an array so QA can compare expected strings.
    - Use one output image path per slide.
 
@@ -181,6 +280,10 @@ Deliver:
      executive relevance, evidence gaps, redundancy, abstraction jumps,
      chapter closure, final convergence on the decision request, and whether
      the spoken bridges read naturally in sequence.
+   - Run `scripts/audit_deck_style.py` and resolve high-risk findings: repeated
+     title formulas, one dominant layout family, long runs of the same topology,
+     dense generated copy, weak evidence provenance, or excessive standard AI
+     devices. Use `--strict` when the plan's authorship policy is a release gate.
    - Check reveal timing. Reject a page that states or depicts a later answer
      before the story has earned it, or that substitutes the deck thesis for
      the source-backed page content.
@@ -201,16 +304,23 @@ Deliver:
      different solid brand color only when the user explicitly requests it.
      Set `allow_nonwhite_background` to `true` only for that explicit exception.
    - Keep a consistent visual language across the deck while adapting the subject to each slide.
+   - Keep company typography and margins stable, but vary the material form.
+     Permit a plain statement, source screenshot, native chart, annotated table,
+     reasoning diagram, or generated scene. Do not force all pages into an
+     icon-card or hub-and-spoke system.
 
 6. Validate before spending.
 
 ```bash
-python scripts/validate_plan.py deck-plan.json
-python scripts/generate_images.py deck-plan.json --dry-run
+python3 scripts/validate_plan.py deck-plan.json
+python3 scripts/audit_deck_style.py deck-plan.json --output style-audit.json
+python3 scripts/generate_images.py deck-plan.json --dry-run
 ```
 
 7. Confirm paid generation.
    - Report provider, model, number of images, size, and quality.
+   - If Kimi deck-style QA is enabled, report one additional paid contact-sheet
+     review call.
    - Wait for user confirmation.
 
 8. Generate images.
@@ -236,6 +346,11 @@ with a complete prompt containing:
 - information topology and the reason that topology matches the message;
 - integrated composition direction that binds text, scene, diagrams, KPI
   figures, and visual hierarchy into one page;
+- declared visual source, source-asset references, layout family, and only the
+  graphical devices that the page actually needs;
+- the actual referenced source images when the page uses `source_evidence` or
+  `mixed`; if the generation route cannot attach them, preserve the evidence
+  region for native/local composition instead of fabricating a substitute;
 - page-specific composition: do not reuse one left-title/right-card layout
   across the deck. Let each slide's message choose the form, such as two-column
   comparison, deployment-gap bridge, structural bottleneck map, knowledge
@@ -245,7 +360,9 @@ with a complete prompt containing:
   marketing exaggeration, no gradient background, no background photo, no
   texture, no pattern, no excessive glow, no scenic wallpaper, no disconnected
   card collection when the content has relationships, no separate background +
-  overlay feel.
+  overlay feel, no generic line-icon filler, no automatic circular badges, no
+  repeated rounded-card grid, no glowing AI brain or chip, no fake dashboard,
+  no automatic symmetric hub-and-spoke.
 
 After each `image_gen` call, inspect the slide image directly. Reject malformed
 Chinese, invented slogans, awkward spacing, visual clutter, or a composition
@@ -263,7 +380,7 @@ full-bleed into PPTX using the Presentation skill's
 For provider-script generation, run:
 
 ```bash
-python scripts/generate_images.py deck-plan.json --confirm-paid-call
+python3 scripts/generate_images.py deck-plan.json --confirm-paid-call
 ```
 
 Use `--overwrite` only when intentionally regenerating existing slide images. Use `--limit 1` for a first-slide style calibration when the user requests it.
@@ -271,7 +388,7 @@ Use `--overwrite` only when intentionally regenerating existing slide images. Us
 9. Compose exact local text when enabled.
 
 ```bash
-python scripts/compose_slide_images.py deck-plan.json
+python3 scripts/compose_slide_images.py deck-plan.json
 ```
 
 10. Inspect and review.
@@ -279,30 +396,45 @@ python scripts/compose_slide_images.py deck-plan.json
    - Generate the ordered contact sheet:
 
 ```bash
-python scripts/create_contact_sheet.py deck-plan.json
+python3 scripts/create_contact_sheet.py deck-plan.json
 ```
 
    - Review a contact sheet in order. Confirm each page has one dominant visual
      system, its topology matches the content relationships, the background is
      pure and quiet, and the deck has consistent visual grammar and pacing.
+   - Review whether the deck contains editorial rhythm and material specificity:
+     source evidence, plain typographic pauses, native data views, diagrams, and
+     generated visuals should appear because the argument needs them, not as a
+     fixed quota or repeated template.
+   - Run the zero-cost static audit again after titles and prompts are final:
+
+```bash
+python3 scripts/audit_deck_style.py deck-plan.json --output style-audit.json
+```
+
    - Run local dimension checks for every image.
    - If Kimi QA is enabled, run:
 
 ```bash
-python scripts/qa_images.py deck-plan.json --reviewer kimi --confirm-paid-call
+python3 scripts/qa_images.py deck-plan.json --reviewer kimi --confirm-paid-call
 ```
 
 This call is also paid and requires confirmation. Use `--limit 1` for a
 canary review and `--resume` for the remaining slides without reviewing a
-passing slide twice. Regenerate only failed slides.
+passing slide twice. Add `--deck-style` to review the ordered contact sheet for
+repeated AI-default visual grammar and copy rhythm; that option makes one
+additional paid Kimi call. Regenerate only failed slides.
 
 11. Assemble.
 
 ```bash
-python scripts/assemble_deck.py deck-plan.json
+python3 scripts/assemble_deck.py deck-plan.json
 ```
 
-The assembler preserves editable template structure, duplicates chapter dividers, inserts full-bleed content PNGs, optionally recolors known template colors, and writes a slide inventory.
+The assembler preserves editable template structure, duplicates chapter
+dividers, inserts full-bleed content PNGs, adds editable native content titles
+by default for new plans, optionally recolors known template colors, and writes
+a slide inventory.
 
 12. Verify.
    - Confirm slide count and order against `deck-plan.json`.
@@ -317,7 +449,8 @@ The assembler preserves editable template structure, duplicates chapter dividers
 - Use `assets/parallel-digital-standard-template.pptx`.
 - Use template slide 1 as cover, slide 2 as catalogue, slide 3 as the reusable chapter divider, and slide 5 as closing.
 - Keep chapter-page text editable.
-- Use content slides as replaceable full-slide images.
+- Use content visuals as replaceable full-slide images; keep content titles as
+  editable native text by default.
 - Set `apply_palette_to_template` to `false` only when original corporate branding must remain unchanged.
 - Do not alter the original template asset.
 

@@ -31,6 +31,21 @@ def iter_slides(plan: dict[str, Any]) -> Iterator[tuple[int, int, dict[str, Any]
             yield section_index, slide_index, slide
 
 
+def resolved_title_render_mode(plan: dict[str, Any], slide: dict[str, Any]) -> str:
+    explicit = slide.get("title_render_mode")
+    if explicit in {"image", "native", "none"}:
+        return str(explicit)
+    return "native" if isinstance(plan.get("authorship"), dict) else "image"
+
+
+def image_rendered_text(plan: dict[str, Any], slide: dict[str, Any]) -> list[str]:
+    items = [str(item) for item in slide.get("exact_text", [])]
+    if resolved_title_render_mode(plan, slide) in {"native", "none"}:
+        title = str(slide.get("title", ""))
+        items = [item for item in items if item != title]
+    return items
+
+
 def palette_description(palette: dict[str, str]) -> str:
     order = ("primary", "secondary", "accent", "background", "text", "muted")
     return ", ".join(f"{key} {palette[key]}" for key in order if palette.get(key))

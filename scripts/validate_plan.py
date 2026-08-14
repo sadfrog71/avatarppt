@@ -28,6 +28,16 @@ ALLOWED_COMPOSITION_MODES = {
 }
 ALLOWED_CLAIM_TYPES = {"fact", "inference", "proposal", "decision"}
 ALLOWED_THESIS_EXPRESSIONS = {"implicit", "explicit"}
+ALLOWED_AUTHORSHIP_MODES = {"balanced", "editorial", "strict"}
+ALLOWED_STATIC_AUDIT_MODES = {"warn", "strict"}
+ALLOWED_VISUAL_SOURCES = {
+    "source_evidence",
+    "native_chart",
+    "native_diagram",
+    "generated_visual",
+    "mixed",
+}
+ALLOWED_TITLE_RENDER_MODES = {"image", "native", "none"}
 ALLOWED_LAYOUTS = {
     "opener",
     "overview",
@@ -114,6 +124,45 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
         ):
             errors.append("palette.muted must be a six-digit hex color")
 
+    authorship = plan.get("authorship")
+    if authorship is not None:
+        if not isinstance(authorship, dict):
+            errors.append("top-level 'authorship' must be an object")
+        else:
+            if authorship.get("mode", "editorial") not in ALLOWED_AUTHORSHIP_MODES:
+                errors.append("authorship.mode must be balanced, editorial, or strict")
+            if authorship.get("static_audit", "warn") not in ALLOWED_STATIC_AUDIT_MODES:
+                errors.append("authorship.static_audit must be warn or strict")
+            for field in (
+                "max_formulaic_title_ratio",
+                "max_same_layout_ratio",
+                "max_standard_ai_device_ratio",
+            ):
+                value = authorship.get(field)
+                if value is not None and (
+                    isinstance(value, bool)
+                    or not isinstance(value, (int, float))
+                    or not 0 <= value <= 1
+                ):
+                    errors.append(f"authorship.{field} must be a number from 0 to 1")
+            for field in (
+                "max_same_layout_run",
+                "max_exact_text_items",
+                "max_exact_text_characters",
+            ):
+                value = authorship.get(field)
+                if value is not None and (
+                    isinstance(value, bool) or not isinstance(value, int) or value < 1
+                ):
+                    errors.append(f"authorship.{field} must be a positive integer")
+            for field in ("allowed_formulaic_titles", "allowed_cliche_terms"):
+                value = authorship.get(field)
+                if value is not None and (
+                    not isinstance(value, list)
+                    or any(not isinstance(item, str) or not item.strip() for item in value)
+                ):
+                    errors.append(f"authorship.{field} must be an array of strings")
+
     generation = plan.get("image_generation")
     if not isinstance(generation, dict):
         errors.append("top-level 'image_generation' must be an object")
@@ -192,6 +241,14 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
             errors.append("vision_review.provider must be 'kimi' when enabled")
         if not vision.get("model"):
             errors.append("vision_review.model is required when enabled")
+        deck_style_review = vision.get("deck_style_review")
+        if deck_style_review is not None and not isinstance(deck_style_review, bool):
+            errors.append("vision_review.deck_style_review must be a boolean")
+        contact_sheet = vision.get("contact_sheet")
+        if contact_sheet is not None and (
+            not isinstance(contact_sheet, str) or not contact_sheet.strip()
+        ):
+            errors.append("vision_review.contact_sheet must be a non-empty path")
 
     seen_ids: set[str] = set()
     seen_images: set[str] = set()
@@ -261,6 +318,31 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
         layout = slide.get("layout_type")
         if layout not in ALLOWED_LAYOUTS:
             errors.append(f"{prefix}.layout_type is not supported")
+
+        visual_source = slide.get("visual_source")
+        if visual_source is not None and visual_source not in ALLOWED_VISUAL_SOURCES:
+            errors.append(
+                f"{prefix}.visual_source must be source_evidence, native_chart, "
+                "native_diagram, generated_visual, or mixed"
+            )
+        title_render_mode = slide.get("title_render_mode")
+        if (
+            title_render_mode is not None
+            and title_render_mode not in ALLOWED_TITLE_RENDER_MODES
+        ):
+            errors.append(f"{prefix}.title_render_mode must be image, native, or none")
+        layout_family = slide.get("layout_family")
+        if layout_family is not None and (
+            not isinstance(layout_family, str) or not layout_family.strip()
+        ):
+            errors.append(f"{prefix}.layout_family must be a non-empty string")
+        for field in ("source_asset_refs", "graphic_devices"):
+            value = slide.get(field)
+            if value is not None and (
+                not isinstance(value, list)
+                or any(not isinstance(item, str) or not item.strip() for item in value)
+            ):
+                errors.append(f"{prefix}.{field} must be an array of strings")
 
         exact_text = slide.get("exact_text")
         if not isinstance(exact_text, list) or not exact_text:

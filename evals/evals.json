@@ -30,6 +30,26 @@
       "id": 6,
       "prompt": "整套汇报的中心思想是建设企业自己的智能体平台，但这一页只是背景问题页。请根据我提供的五类瓶颈做视觉表达，不要把中心思想直接写到页面上。",
       "expected_output": "The agent separates the deck-level thesis from the page-level claim, marks the diagnosis page as thesis_expression=implicit, defines a source-backed content boundary, and uses the thesis only as non-literal visual subtext and transition logic. The generated slide contains only the five bottlenecks and their current impacts, with no agent-platform copy, platform illustration, target architecture, promised outcome, or other premature solution leakage."
+    },
+    {
+      "id": 7,
+      "prompt": "这套老板汇报不要有标准 AI 味：不要每页都是圆角卡片、线性图标、中心圆环和箭头，也不要用发光大脑或芯片。保留白底和整页一体化设计。",
+      "expected_output": "The agent keeps the quiet solid canvas and integrated composition while budgeting graphic devices per slide. It prefers typography, source evidence, native charts, tables, and direct annotation before symbolic illustration; records visual_source, layout_family, source_asset_refs, and graphic_devices; and runs the static style audit before any paid generation."
+    },
+    {
+      "id": 8,
+      "prompt": "我给了系统截图、Excel 指标表和两张现场照片。请做管理层汇报，不要把截图重新画成假仪表盘，也不要拿 AI 场景图代替真实证据。",
+      "expected_output": "The plan declares the supplied artifacts as source_asset_refs, uses source_evidence or mixed visual_source values, crops and annotates the original materials, preserves metrics and source notes, and rejects generated substitutes for documentary evidence. Fact pages without traceable source material are flagged by static and visual QA."
+    },
+    {
+      "id": 9,
+      "prompt": "先检查这份 deck-plan 有没有 AI 套路：标题是不是反复用‘不是而是’‘从到’‘先再’，构图是不是重复，文字是不是太密。不要调用付费模型。",
+      "expected_output": "The agent runs scripts/audit_deck_style.py locally without a paid call and reports formulaic-title ratio, repeated layout families and runs, exact-text density, standard AI-device mentions, visual provenance gaps, and a low/medium/high risk level. It does not claim visual QA has passed until slide images and the ordered contact sheet are reviewed."
+    },
+    {
+      "id": 10,
+      "prompt": "内容页默认不要让生图模型生成标题，标题要在 PowerPoint 里可编辑；只有我明确要求时才把标题做到图片里。",
+      "expected_output": "For new plans, the agent defaults title_render_mode to native, excludes the title from image-rendered exact_text, reserves a clean title zone with no placeholder or pseudo-text, and lets the assembler add an editable PowerPoint title. It uses image mode only when explicitly requested and preserves legacy image-title behavior for older plans without authorship metadata."
     }
   ]
 }

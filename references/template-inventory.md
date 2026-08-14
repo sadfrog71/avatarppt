@@ -62,4 +62,9 @@ Slides are listed 1-based for human use and 0-based for scripting.
 
 ## Integration Rule
 
-Keep chapter pages native to the template. Do not cover them with generated images. Content slides can be full-slide images because their visual content is intentionally rasterized.
+Keep chapter pages native to the template. Do not cover them with generated
+images. Content-slide visuals can be full-slide images because their visual
+content is intentionally rasterized. For new plans, keep the content title out
+of the bitmap by default: reserve the top title zone and let the assembler add
+an editable native title above the full-slide image. Use an image-rendered title
+only when `title_render_mode=image` is explicitly declared.

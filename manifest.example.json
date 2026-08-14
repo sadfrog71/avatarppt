@@ -42,6 +42,18 @@
   "include_catalogue": true,
   "include_closing": true,
   "apply_palette_to_template": true,
+  "authorship": {
+    "mode": "editorial",
+    "static_audit": "strict",
+    "max_formulaic_title_ratio": 0.25,
+    "max_same_layout_ratio": 0.45,
+    "max_same_layout_run": 2,
+    "max_exact_text_items": 14,
+    "max_exact_text_characters": 220,
+    "max_standard_ai_device_ratio": 0.35,
+    "allowed_formulaic_titles": [],
+    "allowed_cliche_terms": []
+  },
   "palette": {
     "name": "青绿科技",
     "primary": "#0B6E69",
@@ -60,14 +72,16 @@
     "background_mode": "solid",
     "allow_nonwhite_background": false,
     "style": "clean executive technology presentation",
-    "negative_prompt": "no watermark, no logo, no duplicated text, no cropped text, no gradient background, no photo background, no texture, no pattern, no excessive glow, no scenic wallpaper, no disconnected card collection, no excessive ornament"
+    "negative_prompt": "no watermark, no logo, no duplicated text, no cropped text, no gradient background, no photo background, no texture, no pattern, no excessive glow, no scenic wallpaper, no disconnected card collection, no generic line-icon filler, no circular icon badges, no repeated rounded-card grid, no glowing AI brain or chip, no fake dashboard, no decorative arrows, no automatic symmetric hub-and-spoke, no excessive ornament"
   },
   "vision_review": {
     "enabled": true,
     "provider": "kimi",
     "model": "kimi-k3",
     "output": "outputs/image-qa.json",
-    "require_pass": true
+    "require_pass": true,
+    "deck_style_review": false,
+    "contact_sheet": "outputs/contact-sheet.png"
   },
   "sections": [
     {
@@ -85,9 +99,18 @@
           "content_boundary": "仅呈现用户提供的前后效率证据；不展示后续平台方案、目标架构或决策请求",
           "thesis_connection": "通过可量化证据增强建设主张的可信度，但不直接复述整套主旨",
           "layout_type": "metrics",
+          "title_render_mode": "native",
           "information_topology": "comparison",
+          "visual_source": "native_chart",
+          "source_asset_refs": [
+            "source/efficiency-metrics.xlsx"
+          ],
+          "layout_family": "evidence_comparison",
+          "graphic_devices": [
+            "native before-after chart",
+            "source note"
+          ],
           "exact_text": [
-            "核心流程效率已具备量化验证基础",
             "处理时长",
             "自动化率"
           ],

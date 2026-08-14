@@ -18,11 +18,15 @@ from typing import Any
 from pptx import Presentation
 from pptx.dml.color import RGBColor
 from pptx.enum.dml import MSO_COLOR_TYPE, MSO_FILL
+from pptx.enum.shapes import MSO_SHAPE
+from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
+from pptx.util import Inches, Pt
 
 from deck_utils import (
     configured_minimum_size,
     load_plan,
     resolve_path,
+    resolved_title_render_mode,
     validate_image_geometry,
 )
 from validate_plan import validate_plan
@@ -107,6 +111,62 @@ def add_full_bleed_image_slide(prs: Presentation, image_path: Path) -> Any:
         height=prs.slide_height,
     )
     return slide
+
+
+def add_native_content_title(
+    slide: Any,
+    plan: dict[str, Any],
+    slide_plan: dict[str, Any],
+) -> None:
+    title = str(slide_plan.get("title", "")).strip()
+    if not title:
+        return
+    palette = plan["palette"]
+    title_style = plan.get("native_title_style", {})
+    font_name = str(title_style.get("font_name", "Microsoft YaHei"))
+    font_size = float(title_style.get("font_size", 24))
+    if len(title) > 48:
+        font_size = min(font_size, 18)
+    elif len(title) > 34:
+        font_size = min(font_size, 20)
+
+    accent = slide.shapes.add_shape(
+        MSO_SHAPE.RECTANGLE,
+        Inches(0.20),
+        Inches(0.20),
+        Inches(0.05),
+        Inches(0.48),
+    )
+    accent.name = "Native Title Accent"
+    accent.fill.solid()
+    accent.fill.fore_color.rgb = RGBColor.from_string(
+        palette["accent"].lstrip("#")
+    )
+    accent.line.fill.background()
+
+    title_box = slide.shapes.add_textbox(
+        Inches(0.34),
+        Inches(0.13),
+        Inches(12.55),
+        Inches(0.66),
+    )
+    title_box.name = "Native Content Title"
+    text_frame = title_box.text_frame
+    text_frame.clear()
+    text_frame.word_wrap = True
+    text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+    text_frame.margin_left = 0
+    text_frame.margin_right = 0
+    text_frame.margin_top = 0
+    text_frame.margin_bottom = 0
+    paragraph = text_frame.paragraphs[0]
+    paragraph.alignment = PP_ALIGN.LEFT
+    run = paragraph.add_run()
+    run.text = title
+    run.font.name = font_name
+    run.font.size = Pt(font_size)
+    run.font.bold = True
+    run.font.color.rgb = RGBColor.from_string(palette["text"].lstrip("#"))
 
 
 def update_cover(slide: Any, plan: dict[str, Any]) -> None:
@@ -418,6 +478,9 @@ def build_deck(plan_path: Path) -> tuple[Path, Path]:
                     raise FileNotFoundError(f"missing content image: {image_path}")
                 width, height = validate_image_geometry(image_path, minimum_size)
                 content_slide = add_full_bleed_image_slide(prs, image_path)
+                title_render_mode = resolved_title_render_mode(plan, slide)
+                if title_render_mode == "native":
+                    add_native_content_title(content_slide, plan, slide)
                 ordered_ids.append(content_slide.slide_id)
                 inventory.append(
                     {
@@ -425,6 +488,7 @@ def build_deck(plan_path: Path) -> tuple[Path, Path]:
                         "section": section_index,
                         "id": slide["id"],
                         "title": slide["title"],
+                        "title_render_mode": title_render_mode,
                         "image": str(image_path),
                         "sha256": hashlib.sha256(image_path.read_bytes()).hexdigest(),
                         "dimensions": {"width": width, "height": height},

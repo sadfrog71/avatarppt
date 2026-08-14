@@ -9,7 +9,13 @@ import re
 from pathlib import Path
 from typing import Any
 
-from deck_utils import iter_slides, load_plan, resolve_path
+from deck_utils import (
+    image_rendered_text,
+    iter_slides,
+    load_plan,
+    resolve_path,
+    resolved_title_render_mode,
+)
 from validate_plan import validate_plan
 
 
@@ -107,6 +113,8 @@ class UIComposer:
         self.slide = slide
         self.display = slide.get("designer", {})
         self.generation = plan.get("image_generation", {})
+        self.title_render_mode = resolved_title_render_mode(plan, slide)
+        self.image_text = image_rendered_text(plan, slide)
         self.palette = plan["palette"]
         self.primary = hex_rgb(self.palette["primary"])
         self.secondary = hex_rgb(self.palette["secondary"])
@@ -158,14 +166,38 @@ class UIComposer:
         self.rounded(box, 18, (255, 255, 255, alpha), (255, 255, 255, 64), 1)
 
     def draw_header(self) -> None:
-        title = self.display.get("title") or self.slide.get("title") or self.slide["exact_text"][0]
-        statement = self.display.get("statement") or self.slide.get("message", "")
         header_alpha = int(self.generation.get("header_alpha", 118))
-        self.draw.rectangle((0, 0, CANVAS[0], 114), fill=(255, 255, 255, header_alpha))
         self.draw.rectangle((0, 0, 10, CANVAS[1]), fill=(*self.primary, 255))
         self.draw.rectangle((10, 0, 16, CANVAS[1]), fill=(*self.accent, 255))
+        if self.title_render_mode == "none":
+            return
+
+        self.draw.rectangle((16, 0, CANVAS[0], 114), fill=(255, 255, 255, header_alpha))
+        if self.title_render_mode == "native":
+            return
+
+        title_candidates = (
+            self.display.get("title"),
+            self.slide.get("title"),
+            self.image_text[0] if self.image_text else None,
+        )
+        title = next(
+            (
+                str(candidate)
+                for candidate in title_candidates
+                if candidate and str(candidate) in self.image_text
+            ),
+            "",
+        )
+        statement_candidate = self.display.get("statement") or self.slide.get("message", "")
+        statement = (
+            str(statement_candidate)
+            if statement_candidate and str(statement_candidate) in self.image_text
+            else ""
+        )
         self.draw.rounded_rectangle((48, 34, 180, 40), radius=3, fill=(*self.accent, 255))
-        self.draw_text_box(title, (48, 48), 850, 32, bold=True, fill=self.secondary, max_lines=1)
+        if title:
+            self.draw_text_box(title, (48, 48), 850, 32, bold=True, fill=self.secondary, max_lines=1)
         if statement:
             self.draw_text_box(statement, (48, 86), 980, 15, fill=self.muted, max_lines=1)
 

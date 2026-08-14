@@ -13,8 +13,16 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any
 
+from audit_deck_style import audit_plan
 from credential_store import get_provider_secret
-from deck_utils import iter_slides, load_plan, palette_description, resolve_path
+from deck_utils import (
+    image_rendered_text,
+    iter_slides,
+    load_plan,
+    palette_description,
+    resolve_path,
+    resolved_title_render_mode,
+)
 from validate_plan import validate_plan
 
 
@@ -29,6 +37,28 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
     generation = plan["image_generation"]
     storyline = plan["storyline"]
     facts = "; ".join(slide.get("facts", [])) or "no unsupported numeric claims"
+    visual_source = slide.get("visual_source", "not declared")
+    source_asset_refs = "; ".join(slide.get("source_asset_refs", [])) or "none"
+    layout_family = slide.get("layout_family", slide["information_topology"])
+    graphic_devices = "; ".join(slide.get("graphic_devices", [])) or "only devices justified by the content"
+    title_render_mode = resolved_title_render_mode(plan, slide)
+    if title_render_mode == "native":
+        title_instruction = (
+            "Reserve a clean title zone for editable native PowerPoint text. "
+            "Do not render the title, a title placeholder, or pseudo-text. "
+        )
+    elif title_render_mode == "none":
+        title_instruction = "Do not render a title or reserve a title placeholder. "
+    else:
+        title_instruction = "Render the title only when it appears in exact_text. "
+    if visual_source in {"source_evidence", "mixed"}:
+        provenance_instruction = (
+            "Do not redraw, imitate, or fabricate the declared source assets. "
+            "This text-only provider call does not attach them; preserve a designed "
+            "evidence region for an asset-aware or local composition step. "
+        )
+    else:
+        provenance_instruction = "Do not fabricate screenshots, documentary photos, or data evidence. "
     negative = generation.get(
         "negative_prompt",
         "no watermark, no logo, no duplicated text, no cropped text",
@@ -40,7 +70,8 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
             "professional Chinese typography overlay added later."
         )
     else:
-        exact_text = " | ".join(slide["exact_text"])
+        image_exact_text = image_rendered_text(plan, slide)
+        exact_text = " | ".join(image_exact_text) or "no image-rendered text"
         text_constraint = (
             f"Render only this concise text, exactly as written: {exact_text}. "
             "Do not render planning labels, prompt instructions, the deck "
@@ -78,6 +109,10 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
         f"Visual subject: {slide['visual_subject']}. "
         f"Dominant visual focus: {slide['visual_focus']}. "
         f"Visual reasoning: {slide['visual_reasoning']}. "
+        f"Visual source: {visual_source}. Source asset references: {source_asset_refs}. "
+        f"Layout family: {layout_family}. Approved graphic devices: {graphic_devices}. "
+        f"Title render mode: {title_render_mode}. {title_instruction}"
+        f"{provenance_instruction}"
         f"Non-visible transition cue for composition only: "
         f"{slide['transition']['to_next']}. "
         f"Verified facts only: {facts}. "
@@ -89,7 +124,12 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
         "restrained nodes, connectors, paths, containers, icons, and pale color "
         "blocks when they encode relationships. Use one dominant visual system, "
         "clear hierarchy, generous margins, and a restrained style suitable for "
-        "an executive decision meeting. "
+        "an executive decision meeting. Do not fill whitespace with generic line "
+        "icons, circular badges, rounded-card grids, a glowing AI brain or chip, "
+        "a symmetric hub-and-spoke, fake dashboard chrome, or decorative arrows. "
+        "Use typography, source evidence, native charts, plain tables, and direct "
+        "annotation before introducing a symbolic illustration. Use asymmetry only "
+        "when it clarifies priority; do not manufacture visual complexity. "
         f"Avoid: {negative}."
     )
     custom_prompt = str(slide.get("prompt", "")).strip()
@@ -220,6 +260,7 @@ def main() -> None:
     errors = validate_plan(plan)
     if errors:
         raise SystemExit("\n".join(f"ERROR: {error}" for error in errors))
+    style_audit = audit_plan(plan)
 
     config = plan["image_generation"]
     provider = config["provider"]
@@ -251,6 +292,11 @@ def main() -> None:
     if not pending:
         print("No pending images.")
         return
+    if not style_audit.get("passed"):
+        raise SystemExit(
+            "Static style audit failed; fix the plan before a paid image call. "
+            "Run scripts/audit_deck_style.py for the findings."
+        )
     if not args.confirm_paid_call:
         raise SystemExit(
             "Paid API call blocked. Re-run with --confirm-paid-call after user approval."

@@ -49,6 +49,18 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
   "include_catalogue": true,
   "include_closing": true,
   "apply_palette_to_template": true,
+  "authorship": {
+    "mode": "editorial",
+    "static_audit": "strict",
+    "max_formulaic_title_ratio": 0.25,
+    "max_same_layout_ratio": 0.45,
+    "max_same_layout_run": 2,
+    "max_exact_text_items": 14,
+    "max_exact_text_characters": 220,
+    "max_standard_ai_device_ratio": 0.35,
+    "allowed_formulaic_titles": [],
+    "allowed_cliche_terms": []
+  },
   "palette": {
     "name": "青绿科技",
     "primary": "#0B6E69",
@@ -74,7 +86,9 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
     "provider": "kimi",
     "model": "kimi-k3",
     "output": "outputs/image-qa.json",
-    "require_pass": true
+    "require_pass": true,
+    "deck_style_review": false,
+    "contact_sheet": "outputs/contact-sheet.png"
   },
   "sections": []
 }
@@ -98,9 +112,18 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
       "content_boundary": "仅呈现用户提供的前后效率证据；不展示后续平台方案、目标架构或决策请求",
       "thesis_connection": "通过可量化证据增强建设主张的可信度，但不直接复述整套主旨",
       "layout_type": "metrics",
+      "title_render_mode": "native",
       "information_topology": "comparison",
+      "visual_source": "native_chart",
+      "source_asset_refs": [
+        "source/efficiency-metrics.xlsx"
+      ],
+      "layout_family": "evidence_comparison",
+      "graphic_devices": [
+        "native before-after chart",
+        "source note"
+      ],
       "exact_text": [
-        "核心流程效率已具备量化验证基础",
         "处理时长",
         "自动化率"
       ],
@@ -135,6 +158,13 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
   `open_issues` is empty. Validation blocks image generation otherwise.
 - Keep `id` and `image` unique.
 - Use valid six-digit hex colors.
+- Use `authorship` to configure the zero-cost style audit. `static_audit=warn`
+  reports risks without blocking older plans; `static_audit=strict` turns any
+  style warning into a generation gate. Use `strict` for new plans and release
+  candidates; plans without `authorship` remain warning-only for compatibility.
+  Ratio thresholds must be between 0 and 1. Keep
+  `allowed_formulaic_titles` and `allowed_cliche_terms` narrow and source-
+  justified.
 - Keep `exact_text` concise and designed for the page. Short labels should
   normally be under 18 Chinese characters, but thesis lines, KPI captions, and
   evidence points may be longer when they are necessary for the slide to carry
@@ -157,6 +187,10 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
 - Make `audience_question` the question the page answers and `message` the
   conclusion. Except for cover, chapter, and closing pages, prefer a
   conclusion-led `title` over a topic label.
+- Read all titles as one sequence. Keep contrast formulas such as
+  “不是……而是……”, “从……到……”, and “先……再……” below the configured ratio unless
+  the source argument genuinely depends on that contrast. Mix fact-led,
+  observation-led, decision-led, question, and concise topic titles.
 - Define one `visual_focus` per page. It should describe the first object,
   relationship, or visual system the audience sees. It may contain multiple
   connected elements when the relationship itself is the message.
@@ -167,6 +201,13 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
 - Write `visual_reasoning` to explain why the selected topology expresses the
   slide's conclusion better than a table, bullet list, or unrelated cards. Do
   not mechanically preserve the source format.
+- For new plans, set `visual_source` to `source_evidence`, `native_chart`,
+  `native_diagram`, `generated_visual`, or `mixed`. Record traceable screenshots,
+  documents, tables, charts, photos, or identifiers in `source_asset_refs`.
+  Give each page a concise `layout_family` so the static audit can detect deck-
+  level repetition. Use `graphic_devices` as an allow-list; do not list icons,
+  cards, badges, hubs, arrows, rings, dashboards, or 2.5D scenes unless they
+  explain real content.
 - Write `transition.from_previous` and `transition.to_next` for every content
   slide. Read them in sequence before generation; adjacent pages must connect
   causally rather than only share a topic.
@@ -175,6 +216,13 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
 - Treat `exact_text` as the exclusive visible-copy contract. Do not render
   `core_thesis`, `decision_request`, planning field names, transitions, or
   speaker notes unless the intended words are also present in `exact_text`.
+- New plans default to `title_render_mode=native`: do not include the title in
+  `exact_text`, reserve a clean title zone in the bitmap, and let the assembler
+  add the title as editable PowerPoint text. Set `title_render_mode=image` only
+  when the title must be part of the integrated bitmap, and then include the
+  complete title in `exact_text`. Use `none` only for an intentional untitled
+  page. Plans created before the `authorship` contract retain image-title
+  behavior for compatibility.
 - For `thesis_expression = implicit`, omit the deck thesis and decision request
   from the image prompt. Reject literal depictions of deferred solutions even
   when they contain no text; visual objects also make claims.
@@ -195,6 +243,13 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
   diagrams, KPI figures, scene, and information hierarchy into one visual
   argument, and should avoid repeated template-like compositions across the
   deck.
+- Before paid generation, run `scripts/audit_deck_style.py`. Resolve high-risk
+  formulaic copy, dense generated text, dominant layout families, long repeated
+  runs, undeclared evidence sources, and common AI-default visual devices.
+- Set `vision_review.deck_style_review=true` only after confirming one
+  additional paid Kimi call. The review uses the ordered contact sheet to judge
+  repeated layouts, generic visual grammar, material specificity, copy rhythm,
+  and editorial authorship across the deck.
 - Avoid exaggerated, promotional conclusions in `exact_text` and prompts. Do
   not invent lines such as "不是追赶者，而是定义者"; use restrained claims tied to
   the source outline.
