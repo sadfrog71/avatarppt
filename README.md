@@ -26,8 +26,22 @@ It keeps chapter divider pages native to the template and inserts generated full
 - Requires visual inspection of generated Chinese text before insertion, especially repeated phrases, malformed characters, and text overlap.
 - Uses pure white solid content-page backgrounds by default and rejects busy
   textures, gradients, scenic wallpaper, and competing decorative elements.
+- Keeps new content-slide titles editable in PowerPoint by default instead of
+  asking the image model to render them.
+- Defaults prose to Traditional Chinese, preserves technical abbreviations such
+  as AI, KPI, FDE, and SCADA in English, and writes content titles as conclusions
+  rather than labels such as “專案成效”.
+- Treats anti-AI style as a whole-page composition check rather than a ban on
+  graphics: conceptual accent graphics normally occupy about 15%-30%, while
+  information-bearing frameworks, processes, concepts, charts, screenshots,
+  and evidence may use more space.
+- Runs static and optional Kimi visual QA for both failure modes: repetitive
+  template decoration and visually unfinished text-and-rule pages.
+- Requires a non-text semantic visual anchor, flags high speaker dependency,
+  and foregrounds source-backed baseline, target, actual result, and time period
+  on metrics pages.
 - Reviews the whole contact sheet for executive visual focus, deck-level
-  continuity, and smooth spoken transitions.
+  continuity, immediate comprehension, and smooth spoken transitions.
 
 ## Project Structure
 
@@ -44,6 +58,7 @@ imageavatarppt/
 │   └── template-inventory.md
 ├── scripts/
 │   ├── validate_plan.py
+│   ├── audit_deck_style.py
 │   ├── create_contact_sheet.py
 │   ├── generate_images.py
 │   ├── qa_images.py
@@ -62,6 +77,7 @@ Create and validate a deck plan first:
 
 ```bash
 python scripts/validate_plan.py manifest.example.json
+python scripts/audit_deck_style.py manifest.example.json
 python scripts/generate_images.py manifest.example.json --dry-run
 ```
 

@@ -8,7 +8,12 @@ import re
 from pathlib import Path
 from typing import Any
 
-from deck_utils import HEX_COLOR, iter_slides, load_plan
+from deck_utils import (
+    DEFAULT_MAX_ACCENT_GRAPHIC_AREA_RATIO,
+    HEX_COLOR,
+    iter_slides,
+    load_plan,
+)
 
 
 REQUIRED_PALETTE_KEYS = (
@@ -38,6 +43,17 @@ ALLOWED_VISUAL_SOURCES = {
     "mixed",
 }
 ALLOWED_TITLE_RENDER_MODES = {"image", "native", "none"}
+ALLOWED_GRAPHIC_ROLES = {"accent", "explanatory", "evidence", "none"}
+ALLOWED_PRIMARY_LANGUAGES = {"zh-Hant", "zh-Hans", "en", "mixed"}
+ALLOWED_MATERIAL_FORMS = {
+    "typography",
+    "source_evidence",
+    "data_visual",
+    "diagram",
+    "illustration",
+    "table",
+    "mixed",
+}
 ALLOWED_LAYOUTS = {
     "opener",
     "overview",
@@ -57,6 +73,28 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
         errors.append("top-level 'output' is required")
     if not plan.get("cover_title"):
         errors.append("top-level 'cover_title' is required")
+
+    language = plan.get("language")
+    if language is not None:
+        if not isinstance(language, dict):
+            errors.append("top-level 'language' must be an object")
+        else:
+            if language.get("primary", "zh-Hant") not in ALLOWED_PRIMARY_LANGUAGES:
+                errors.append(
+                    "language.primary must be zh-Hant, zh-Hans, en, or mixed"
+                )
+            preserve_terms = language.get("preserve_terms")
+            if preserve_terms is not None and (
+                not isinstance(preserve_terms, list)
+                or not preserve_terms
+                or any(
+                    not isinstance(item, str) or not item.strip()
+                    for item in preserve_terms
+                )
+            ):
+                errors.append(
+                    "language.preserve_terms must be a non-empty array of strings"
+                )
 
     storyline = plan.get("storyline")
     if not isinstance(storyline, dict):
@@ -137,6 +175,8 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
                 "max_formulaic_title_ratio",
                 "max_same_layout_ratio",
                 "max_standard_ai_device_ratio",
+                "max_typography_first_ratio",
+                "max_same_material_form_ratio",
             ):
                 value = authorship.get(field)
                 if value is not None and (
@@ -162,7 +202,16 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
                     or any(not isinstance(item, str) or not item.strip() for item in value)
                 ):
                     errors.append(f"authorship.{field} must be an array of strings")
+            for field in (
+                "require_conclusion_titles",
+                "require_semantic_visual_anchor",
+                "require_result_evidence_on_metrics",
+            ):
+                value = authorship.get(field)
+                if value is not None and not isinstance(value, bool):
+                    errors.append(f"authorship.{field} must be a boolean")
 
+    max_accent_graphic_area_ratio = DEFAULT_MAX_ACCENT_GRAPHIC_AREA_RATIO
     generation = plan.get("image_generation")
     if not isinstance(generation, dict):
         errors.append("top-level 'image_generation' must be an object")
@@ -182,6 +231,21 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
             errors.append("image_generation.composition_mode is not supported")
         if generation.get("background_mode", "solid") != "solid":
             errors.append("image_generation.background_mode must be 'solid'")
+        configured_graphic_ratio = generation.get(
+            "max_accent_graphic_area_ratio",
+            DEFAULT_MAX_ACCENT_GRAPHIC_AREA_RATIO,
+        )
+        if (
+            isinstance(configured_graphic_ratio, bool)
+            or not isinstance(configured_graphic_ratio, (int, float))
+            or not 0 < configured_graphic_ratio <= 0.30
+        ):
+            errors.append(
+                "image_generation.max_accent_graphic_area_ratio must be a number "
+                "greater than 0 and no greater than 0.30"
+            )
+        else:
+            max_accent_graphic_area_ratio = float(configured_graphic_ratio)
         allow_nonwhite = generation.get("allow_nonwhite_background", False)
         if not isinstance(allow_nonwhite, bool):
             errors.append(
@@ -331,6 +395,66 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
             and title_render_mode not in ALLOWED_TITLE_RENDER_MODES
         ):
             errors.append(f"{prefix}.title_render_mode must be image, native, or none")
+        graphic_role = slide.get("graphic_role")
+        if graphic_role is not None and graphic_role not in ALLOWED_GRAPHIC_ROLES:
+            errors.append(
+                f"{prefix}.graphic_role must be accent, explanatory, evidence, or none"
+            )
+        material_form = slide.get("material_form")
+        if material_form is not None and material_form not in ALLOWED_MATERIAL_FORMS:
+            errors.append(
+                f"{prefix}.material_form must be typography, source_evidence, "
+                "data_visual, diagram, illustration, table, or mixed"
+            )
+        semantic_visual_anchor = slide.get("semantic_visual_anchor")
+        if semantic_visual_anchor is not None and (
+            not isinstance(semantic_visual_anchor, str)
+            or not semantic_visual_anchor.strip()
+        ):
+            errors.append(
+                f"{prefix}.semantic_visual_anchor must be a non-empty string"
+            )
+        require_anchor = isinstance(authorship, dict) and authorship.get(
+            "require_semantic_visual_anchor", False
+        )
+        if require_anchor:
+            if material_form is None:
+                errors.append(f"{prefix}.material_form is required by authorship")
+            if graphic_role in {"accent", "explanatory", "evidence"} and not (
+                isinstance(semantic_visual_anchor, str)
+                and semantic_visual_anchor.strip()
+            ):
+                errors.append(
+                    f"{prefix}.semantic_visual_anchor is required for "
+                    f"graphic_role={graphic_role}"
+                )
+        if graphic_role == "none" and isinstance(semantic_visual_anchor, str):
+            errors.append(
+                f"{prefix}.semantic_visual_anchor conflicts with graphic_role=none"
+            )
+        graphic_area_ratio = slide.get("graphic_area_ratio")
+        if graphic_area_ratio is not None and (
+            isinstance(graphic_area_ratio, bool)
+            or not isinstance(graphic_area_ratio, (int, float))
+            or not 0 <= graphic_area_ratio <= 1
+        ):
+            errors.append(f"{prefix}.graphic_area_ratio must be a number from 0 to 1")
+        elif isinstance(graphic_area_ratio, (int, float)) and not isinstance(
+            graphic_area_ratio, bool
+        ):
+            if (
+                graphic_role == "accent"
+                and not 0 < graphic_area_ratio <= max_accent_graphic_area_ratio
+            ):
+                errors.append(
+                    f"{prefix}.graphic_area_ratio must be greater than 0 and no "
+                    f"greater than the configured accent limit of "
+                    f"{max_accent_graphic_area_ratio:.2f}"
+                )
+            if graphic_role == "none" and graphic_area_ratio != 0:
+                errors.append(
+                    f"{prefix}.graphic_area_ratio must be 0 when graphic_role is none"
+                )
         layout_family = slide.get("layout_family")
         if layout_family is not None and (
             not isinstance(layout_family, str) or not layout_family.strip()
@@ -343,6 +467,37 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
                 or any(not isinstance(item, str) or not item.strip() for item in value)
             ):
                 errors.append(f"{prefix}.{field} must be an array of strings")
+
+        result_evidence = slide.get("result_evidence")
+        require_result_evidence = isinstance(authorship, dict) and authorship.get(
+            "require_result_evidence_on_metrics", False
+        )
+        if result_evidence is not None:
+            if not isinstance(result_evidence, dict):
+                errors.append(f"{prefix}.result_evidence must be an object")
+            else:
+                for field in ("baseline", "target", "actual", "time_period"):
+                    if field not in result_evidence:
+                        errors.append(f"{prefix}.result_evidence.{field} is required")
+                    elif result_evidence[field] is not None and (
+                        not isinstance(result_evidence[field], str)
+                        or not result_evidence[field].strip()
+                    ):
+                        errors.append(
+                            f"{prefix}.result_evidence.{field} must be a non-empty "
+                            "string or null"
+                        )
+                source_ref = result_evidence.get("source_ref")
+                if source_ref is not None and (
+                    not isinstance(source_ref, str) or not source_ref.strip()
+                ):
+                    errors.append(
+                        f"{prefix}.result_evidence.source_ref must be a non-empty string"
+                    )
+        elif require_result_evidence and layout == "metrics":
+            errors.append(
+                f"{prefix}.result_evidence is required for metrics slides"
+            )
 
         exact_text = slide.get("exact_text")
         if not isinstance(exact_text, list) or not exact_text:

@@ -50,6 +50,16 @@
       "id": 10,
       "prompt": "内容页默认不要让生图模型生成标题，标题要在 PowerPoint 里可编辑；只有我明确要求时才把标题做到图片里。",
       "expected_output": "For new plans, the agent defaults title_render_mode to native, excludes the title from image-rendered exact_text, reserves a clean title zone with no placeholder or pseudo-text, and lets the assembler add an editable PowerPoint title. It uses image mode only when explicitly requested and preserves legacy image-title behavior for older plans without authorship metadata."
+    },
+    {
+      "id": 11,
+      "prompt": "不要为了去 AI 味把页面做成全是文字和线条。高层汇报要美观、简洁、一目了然、方便讲述；必要的框架图和叙事概念可以用 ImageGen 表达，普通点缀图形控制在 30% 以内。",
+      "expected_output": "The agent evaluates overall visual completeness before individual devices. It defaults conceptual pages to graphic_role=accent with one or two semantic visual accents covering roughly 15%-30% of usable content area, while allowing explanatory frameworks, process diagrams, narrative concepts, charts, screenshots, and evidence visuals to occupy more because they carry information. Every non-typographic page declares a semantic_visual_anchor that carries meaning beyond labels. QA rejects barren text-and-rule pages, empty containers, decoration-dominated templates, and high speaker dependency, while allowing a relevant card, icon, arrow, or hub when the content requires it."
+    },
+    {
+      "id": 12,
+      "prompt": "繁体中文为主，AI、KPI、FDE、SCADA等专业词保留英文。每页标题直接写结论，例如‘提前36小时识别风险，减少被动处置’，不要只写‘项目成效’。页面优先呈现基线、目标、实际结果和时间周期。",
+      "expected_output": "The plan sets language.primary=zh-Hant and preserves protected technical abbreviations in English. Content titles remain editable native PowerPoint text but state a source-backed conclusion rather than a generic topic. Metrics pages declare result_evidence with baseline, target, actual, time_period, and source_ref; supplied values and units appear prominently in the title or exact_text, missing values are recorded as gaps rather than invented, and static plus visual QA reject topic-only titles or hidden result evidence."
     }
   ]
 }

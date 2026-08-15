@@ -5,8 +5,10 @@ This guide defines the full-slide PNG style used for content pages.
 ## Contents
 
 - [Visual Direction](#visual-direction)
+- [Language, Titles, And Result Evidence](#language-titles-and-result-evidence)
 - [Editorial Authorship And Source Priority](#editorial-authorship-and-source-priority)
 - [Executive Visual Hierarchy](#executive-visual-hierarchy)
+- [Graphic Balance And The 30 Percent Rule](#graphic-balance-and-the-30-percent-rule)
 - [Narrative Role And Content Boundary](#narrative-role-and-content-boundary)
 - [Information Topology First](#information-topology-first)
 - [Palette](#palette)
@@ -30,6 +32,18 @@ state. Avoid lines such as "不是追赶者，而是定义者", "重新定义行
 or "绝对领先" unless the user explicitly asks for that exact language. Prefer
 measurable, neutral wording.
 
+## Language, Titles, And Result Evidence
+
+- Default executive copy to Traditional Chinese. Keep source-approved technical
+  abbreviations such as `AI`, `KPI`, `FDE`, and `SCADA` in English; do not turn
+  them into Chinese approximations or full-width pseudo-English.
+- Keep new content titles editable and native, but make the title itself a
+  conclusion. Write “提前36小時識別風險，減少被動處置”, not “專案成效”. Write
+  what changed, by how much, under what condition, or what decision follows.
+- On result pages, prioritize the evidence frame: baseline, target, actual
+  result, and time period. Keep units, denominators, and source notes visible.
+  If the source omits one item, record the gap and do not invent it.
+
 ## Editorial Authorship And Source Priority
 
 Create authorship through selection and evidence, not through simulated
@@ -50,9 +64,11 @@ may deliberately include a plain statement page, an annotated screenshot, a
 dense but readable table, and a diagram; it does not need an illustration on
 every page.
 
-For new plans, record `visual_source`, `source_asset_refs`, `layout_family`, and
-`graphic_devices`. Treat `graphic_devices` as a budget: list only the visual
-devices needed to explain the claim. Do not let a model invent extra icons,
+For new plans, record `visual_source`, `source_asset_refs`, `layout_family`,
+`material_form`, `semantic_visual_anchor`, `graphic_role`,
+`graphic_area_ratio`, and `graphic_devices`. Treat
+`graphic_devices` as a budget: list the visual devices needed to explain the
+claim or complete the composition. Do not let a model invent repetitive icons,
 cards, badges, arrows, dashboards, or technology scenery.
 
 Default new content pages to `title_render_mode=native`. The image must reserve
@@ -86,16 +102,46 @@ Design for a decision-maker scanning the page from a distance:
   decoration. A management slide may feel visually calm while still looking
   deliberate and high quality.
 - Allow restrained connectors, nodes, containers, paths, and flat color blocks
-  only when they encode business meaning. Circular badges, concentric rings,
-  central hubs, rounded-card grids, generic line-icon systems, fake dashboards,
-  decorative arrows, isometric worlds, glassmorphism, glow, and floating
-  objects are not defaults.
+  when they encode business meaning or complete the reading path. Circular
+  badges, concentric rings, central hubs, rounded-card grids, generic line-icon
+  systems, fake dashboards, decorative arrows, isometric worlds, glassmorphism,
+  glow, and floating objects are not defaults, but an individual device is
+  acceptable when the content needs it and the overall page remains coherent.
 
 Across a deck, keep title position, margins, palette, icon language, line style,
 and typography stable. Vary composition according to the reasoning: diagnose,
 compare, explain, prove, sequence, or decide. Adjacent pages that discuss the
 same system should retain a visual anchor; a new visual language should signal a
 real narrative shift.
+
+## Graphic Balance And The 30 Percent Rule
+
+Treat anti-AI guidance as a composition test, not a ban on graphics. A page that
+contains only text, thin rules, and unused whitespace is not automatically more
+human-authored; it may simply be visually unfinished.
+
+- Use `graphic_role=accent` by default for conceptual content pages. Add one or
+  two semantic accents, a compact domain vignette, a simplified object
+  silhouette, or a small relationship sketch. Target roughly 15%-30% of the
+  usable content area; never exceed the configured 30% accent limit.
+- Use `graphic_role=explanatory` when a framework, process, architecture, or
+  narrative concept is the clearest explanation. Use `graphic_role=evidence`
+  for charts, screenshots, photos, maps, tables, or documentary objects. These
+  information-bearing visuals may exceed 30%; secondary decoration may not.
+- Use `graphic_role=none` only for an intentional typographic pause. Preserve
+  visual completeness through scale, alignment, spacing, and one clear path.
+- Judge cards, icons, arrows, hubs, and illustrations in context. One relevant
+  element can improve comprehension; mechanical repetition creates the
+  AI-template feeling.
+- Prioritize the executive test: attractive, simple, immediately understandable,
+  and easy to narrate aloud.
+- Require one semantic visual anchor for `accent`, `explanatory`, and `evidence`
+  pages. A source object, data pattern, business object, domain silhouette,
+  framework, process, spatial system, or narrative concept can qualify. Text
+  inside boxes, thin rules, arrows, or empty containers cannot qualify alone.
+- Apply the speaker-dependency test: title plus visual should communicate the
+  conclusion and main relationship within a few seconds. Narration may add
+  context and caveats; it must not supply the missing argument.
 
 ## Narrative Role And Content Boundary
 
@@ -170,13 +216,16 @@ Create lighter and darker tints from these colors only when needed for hierarchy
 - Use bold Chinese sans-serif for titles: Microsoft YaHei, Source Han Sans, Alibaba PuHuiTi, or equivalent.
 - Keep content titles editable and native by default; image models render them
   only in explicitly declared `image` mode.
+- Write prose in Traditional Chinese by default while preserving `AI`, `KPI`,
+  `FDE`, `SCADA`, and other source-approved technical abbreviations in English.
 - Use the palette `text` color for main titles and main metrics.
 - Use the palette `muted` color for body text.
 - Use huge bold numbers for metrics when the slide has KPIs or quantitative outcomes.
 - Keep Chinese text short and high-level in image-model prompts. Prefer concise labels, 2-6 word card titles, and one-line support text.
 - Generated Chinese text must be inspected after image generation. Regenerate the image if key terms are wrong, repeated, malformed, overlapped, cropped, or too small.
 - Vary title forms across the deck. Use fact-led, observation-led, decision-led,
-  question, or concise topic titles according to the page role. Do not build the
+  or question titles according to the page role. Content-slide titles must state
+  the conclusion; reserve topic-only labels for covers and chapter pages. Do not build the
   deck voice from repeated “不是……而是……”, “从……到……”, “先……再……”, parallel
   three-part slogans, or generic verbs such as “全面赋能” and “重新定义”.
 - Prefer concrete actors, actions, objects, dates, quantities, and operating
@@ -187,6 +236,9 @@ Create lighter and darker tints from these colors only when needed for hierarchy
 
 Choose the lightest device that explains the conclusion:
 
+- Do not make the page visually barren. When the source has no strong evidence
+  object, use a restrained semantic illustration, domain silhouette, mini
+  framework, or compact visual metaphor to give the argument a visible anchor.
 - Use typography, rules, direct annotation, a real source artifact, or a native
   chart before adding symbolic illustration.
 - Use a card only when it establishes a real grouping or comparison. Do not use
@@ -324,12 +376,24 @@ Prompt variables:
   photos, or identifiers that must remain traceable.
 - `{layout_family}`: the editorial family used to control deck-level repetition.
 - `{graphic_devices}`: a short allow-list of visual devices justified by the
-  page; an empty list means typography and source material should carry it.
+  page. Keep it empty only when source material already carries the page or the
+  page is an intentional typographic pause.
+- `{graphic_role}`: `accent`, `explanatory`, `evidence`, or intentional `none`.
+- `{graphic_area_ratio}`: estimated share of usable content area. Keep `accent`
+  pages around 0.15-0.30; information-bearing visuals may be larger.
+- `{material_form}`: typography, source evidence, data visual, diagram,
+  illustration, table, or mixed.
+- `{semantic_visual_anchor}`: the non-text object or pattern that visibly carries
+  meaning before supporting labels are read.
+- `{result_evidence}`: source-backed baseline, target, actual result, and time
+  period; show supplied values prominently and never invent missing values.
+- `{language_policy}`: Traditional Chinese prose plus exact protected English
+  technical terms.
 
 Generic prompt pattern:
 
 ```text
-16:9 full-slide Chinese executive PowerPoint page for {domain}. Narrative role: {narrative_role}. Audience question: {audience_question}. Page conclusion: {message}. Thesis expression: {thesis_expression}. Content boundary: {content_boundary}. Thesis connection: {thesis_connection}. Visual source: {visual_source}. Source asset references: {source_asset_refs}. Layout family: {layout_family}. Approved graphic devices: {graphic_devices}. Title render mode: {title_render_mode}; in native mode reserve a clean title zone and render no title, placeholder, or pseudo-text. Use a pure white solid background with no texture, pattern, background photo, or scenic wallpaper. Information topology: {information_topology}. Visual reasoning: {visual_reasoning}. Create one primary reading path: {visual_focus}. Prefer typography, source evidence, native charts, plain tables, and direct annotation before symbolic illustration. Do not add generic line icons, circular badges, rounded-card grids, a glowing AI brain or chip, fake dashboards, decorative arrows, or automatic hub-and-spoke composition. Exact palette {palette}, enterprise report style, generous whitespace, stable grid. Render only this exact concise Chinese text: {exact_chinese_text}. Do not render planning labels, prompt instructions, or deferred solution content. No text overlap, no duplicated text, no cropped text, no malformed Chinese characters, no logos.
+16:9 full-slide Chinese executive PowerPoint page for {domain}. Use {language_policy}. Narrative role: {narrative_role}. Audience question: {audience_question}. Page conclusion: {message}. Native conclusion title: {title}. Thesis expression: {thesis_expression}. Content boundary: {content_boundary}. Thesis connection: {thesis_connection}. Visual source: {visual_source}. Source asset references: {source_asset_refs}. Layout family: {layout_family}. Material form: {material_form}. Semantic visual anchor: {semantic_visual_anchor}; make it visibly carry one layer of meaning beyond text arrangement. Approved graphic devices: {graphic_devices}. Graphic role: {graphic_role}; graphic area ratio: {graphic_area_ratio}. For accent pages, use one or two semantic visual accents covering roughly 15%-30% of the usable content area. Frameworks, processes, narrative concepts, charts, and evidence visuals may be larger because they carry information. Prioritize supplied result evidence: {result_evidence}. Do not make the page text-only or line-only by default. Title render mode: {title_render_mode}; in native mode reserve a clean title zone and render no title, placeholder, or pseudo-text. Use a pure white solid background with no texture, pattern, background photo, or scenic wallpaper. Information topology: {information_topology}. Visual reasoning: {visual_reasoning}. Create one primary reading path: {visual_focus}. Judge the complete page for beauty, simplicity, executive glanceability, and low speaker dependency. Do not mechanically repeat generic line-icon rows, circular badges, rounded-card grids, glowing AI symbols, fake dashboards, or automatic hub-and-spoke composition. An individual relevant device is allowed. Exact palette {palette}, enterprise report style, generous whitespace, stable grid. Render only this exact concise Chinese text: {exact_chinese_text}. Do not render planning labels, prompt instructions, or deferred solution content. No text overlap, no duplicated text, no cropped text, no malformed Chinese characters, no logos.
 ```
 
 If the generated result contains Chinese errors or collisions, tighten the copy and regenerate the image. Do not patch around major text defects by inserting the faulty image into the PPT.
@@ -361,6 +425,7 @@ whole. Do not create a background first and then place cards or text on top.
 Palette: {palette}.
 Topic: {slide_topic}.
 Page message: {message}.
+Conclusion-led native title: {title}.
 Audience question: {audience_question}.
 Claim type: {claim_type}.
 Narrative role: {narrative_role}.
@@ -374,6 +439,17 @@ Visual source: {visual_source}.
 Source asset references: {source_asset_refs}.
 Layout family: {layout_family}.
 Approved graphic devices: {graphic_devices}.
+Material form: {material_form}.
+Non-text semantic visual anchor: {semantic_visual_anchor}. It must remain
+meaningful before labels are read; boxes, lines, and arrows alone are not enough.
+Graphic role: {graphic_role}. Planned graphic area ratio: {graphic_area_ratio}.
+For accent pages, keep one or two semantic graphic accents within 30% of the
+usable content area. For explanatory or evidence pages, let the framework,
+process, concept diagram, chart, screenshot, or source object become the visual
+centerpiece when that is the clearest way to understand the message.
+Result evidence: {result_evidence}. Foreground the supplied baseline, target,
+actual result, and time period with exact units and dates. Do not invent gaps.
+Language policy: {language_policy}.
 Canvas: pure white solid background. No background gradient, photo, texture,
 pattern, glow, or decorative scene. Subtle shading inside semantic nodes is
 allowed when it supports hierarchy.
@@ -386,12 +462,18 @@ preparing the audience for {transition_to_next}.
 If thesis expression is implicit: do not include the deck thesis or decision
 request in the image prompt; do not render or literally depict the deferred
 answer. Use the thesis connection only as non-literal visual subtext.
+Overall quality: make the complete page beautiful, simple, immediately
+understandable, and easy for an executive speaker to narrate. Do not equate
+anti-AI style with removing all illustrations, shapes, icons, or diagrams.
+The title and visual must communicate the main logic without relying on an
+unusually skilled speaker.
 Avoid: watermark, logo, pseudo text, invented claims, inflated slogans,
 oversized opaque cards, dense bullet pages, scenic wallpaper, decorative 3D
 objects, glassmorphism, excessive ornament, disconnected cards that hide real
 relationships, separate background + overlay feel, generic line-icon filler,
 automatic circular badges, repeated rounded-card grids, glowing AI brains or
-chips, fake dashboards, decorative arrows, automatic symmetric hub-and-spoke.
+chips, fake dashboards, arrows without relationships, automatic symmetric
+hub-and-spoke. These are relevance and repetition checks, not absolute bans.
 ```
 
 Keep the exact visible Chinese text short. For longer source material, convert
@@ -420,7 +502,7 @@ the slide is intentionally a chapter divider or closing page.
 ## Negative Prompt
 
 ```text
-no watermark, no logo, no generated stock-photo substitute, no cartoon, no dark cyberpunk, no neon overload, no unrelated colors, no gradient background, no background photo, no texture, no pattern, no excessive glow, no cinematic wallpaper, no floating decorative objects, no glassmorphism overload, no disconnected card collection, no generic line-icon filler, no automatic circular badges, no repeated rounded-card grid, no glowing AI brain or chip, no fake dashboard, no decorative arrows, no automatic symmetric hub-and-spoke, no excessive ornament, no clutter, no duplicated text, no overlapping text, no tiny unreadable text, no malformed Chinese characters, no random extra labels
+no watermark, no logo, no generated stock-photo substitute, no cartoon, no dark cyberpunk, no neon overload, no unrelated colors, no gradient background, no background photo, no texture, no pattern, no excessive glow, no cinematic wallpaper, no unrelated floating decorative objects, no glassmorphism overload, no disconnected card collection, no repeated generic line-icon filler, no automatic circular badges, no repeated rounded-card grid, no glowing AI brain or chip, no fake dashboard, no arrows without relationships, no automatic symmetric hub-and-spoke, no excessive ornament, no clutter, no duplicated text, no overlapping text, no tiny unreadable text, no malformed Chinese characters, no random extra labels
 ```
 
 ## Final Image Checklist
@@ -435,6 +517,10 @@ no watermark, no logo, no generated stock-photo substitute, no cartoon, no dark 
 - Key business terms match the user's source material.
 - Formulaic title structures and generic transformation slogans do not dominate
   the deck voice.
+- Content-slide titles state conclusions rather than generic topics. Covers and
+  chapter pages may remain topic-led.
+- Prose uses Traditional Chinese while protected technical terms such as `AI`,
+  `KPI`, `FDE`, and `SCADA` remain in English.
 - Declared source assets remain recognizable and are not replaced by synthetic
   screenshots, dashboards, metrics, or documentary imagery.
 - Bitmap copy contains only `exact_text`; a native title appears only after
@@ -451,6 +537,12 @@ no watermark, no logo, no generated stock-photo substitute, no cartoon, no dark 
 - Every content page uses a pure white or explicitly approved solid-color
   background with no busy decorative treatment.
 - Each page has one unmistakable dominant visual system.
+- Each non-typographic page has a recognizable semantic visual anchor; text
+  boxes, thin rules, and arrows do not carry the page alone.
+- Accent pages contain enough semantic graphics to feel complete, normally
+  around 15%-30% of the usable content area, without letting decoration dominate.
+- Explanatory and evidence pages may devote more area to a framework, process,
+  narrative concept, chart, screenshot, or source object when it carries the argument.
 - A page may instead use one primary reading path carried by typography, a
   source artifact, a native chart, or a plain table; it is not forced into a
   diagram.
@@ -466,3 +558,9 @@ no watermark, no logo, no generated stock-photo substitute, no cartoon, no dark 
   as a default visual grammar.
 - The deck contains visible editorial selection: different material forms are
   used because the evidence and argument differ, not to satisfy a template.
+- From a senior leader's perspective, every page is attractive, simple,
+  immediately understandable, and easy to explain aloud.
+- Metrics and result pages foreground supplied baseline, target, actual result,
+  and time period, with source-backed values and units.
+- Speaker dependency is not high: the title and visual carry the conclusion and
+  main relationship before narration begins.

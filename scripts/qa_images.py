@@ -16,10 +16,15 @@ from deck_utils import (
     configured_minimum_size,
     image_rendered_text,
     iter_slides,
+    language_policy_description,
     load_plan,
+    max_accent_graphic_area_ratio,
     palette_description,
     resolve_path,
+    resolved_graphic_area_ratio,
+    resolved_graphic_role,
     resolved_title_render_mode,
+    result_evidence_items,
     validate_image_geometry,
 )
 from generate_images import post_json
@@ -58,6 +63,142 @@ def enforce_ai_aesthetic_gate(review: dict[str, Any]) -> dict[str, Any]:
     return review
 
 
+def enforce_visual_balance_gate(
+    review: dict[str, Any],
+    graphic_role: str,
+    max_accent_ratio: float = 0.30,
+    semantic_anchor_required: bool = False,
+    result_evidence_required: bool = False,
+) -> dict[str, Any]:
+    review = enforce_ai_aesthetic_gate(review)
+    balance = str(review.get("graphic_balance", "")).lower()
+    semantic_graphics_present = review.get("semantic_graphics_present")
+    issues = review.setdefault("issues", [])
+    if not isinstance(issues, list):
+        issues = []
+        review["issues"] = issues
+
+    if graphic_role in {"accent", "explanatory", "evidence"} and (
+        balance == "too_sparse" or semantic_graphics_present is False
+    ):
+        review["pass"] = False
+        if not any("semantic graphics" in str(issue) for issue in issues):
+            issues.append(
+                f"semantic graphics are too sparse for graphic_role={graphic_role}"
+            )
+    if graphic_role == "accent" and balance == "too_dominant":
+        review["pass"] = False
+        if not any("accent graphics" in str(issue) for issue in issues):
+            issues.append("accent graphics dominate the page instead of supporting it")
+    estimated_ratio = review.get("estimated_graphic_area_ratio")
+    if (
+        graphic_role == "accent"
+        and not isinstance(estimated_ratio, bool)
+        and isinstance(estimated_ratio, (int, float))
+        and estimated_ratio > max_accent_ratio + 0.05
+    ):
+        review["pass"] = False
+        if not any("estimated accent graphic area" in str(issue) for issue in issues):
+            issues.append(
+                "estimated accent graphic area exceeds the configured budget "
+                f"({estimated_ratio:.2f} > {max_accent_ratio:.2f}, allowing 0.05 "
+                "visual-estimation tolerance)"
+            )
+    for field in (
+        "executive_glanceability",
+        "narration_support",
+        "visual_completeness",
+    ):
+        if review.get(field) is False:
+            review["pass"] = False
+            if not any(field in str(issue) for issue in issues):
+                issues.append(f"{field} failed")
+    if semantic_anchor_required and (
+        review.get("semantic_visual_anchor_match") is False
+        or str(review.get("visual_semantic_load", "")).lower() == "low"
+        or review.get("text_container_dominance") is True
+    ):
+        review["pass"] = False
+        if not any("semantic visual anchor" in str(issue) for issue in issues):
+            issues.append(
+                "semantic visual anchor is missing or the page is dominated by "
+                "text containers and lines"
+            )
+    if str(review.get("speaker_dependency", "")).lower() == "high":
+        review["pass"] = False
+        if not any("speaker dependency" in str(issue) for issue in issues):
+            issues.append("speaker dependency is high; the visual does not carry the argument")
+    if review.get("language_policy_respected") is False:
+        review["pass"] = False
+        if not any("language policy" in str(issue) for issue in issues):
+            issues.append("Traditional Chinese and protected-term language policy failed")
+    if review.get("title_conclusion_led") is False:
+        review["pass"] = False
+        if not any("conclusion-led title" in str(issue) for issue in issues):
+            issues.append("content-slide title names a topic instead of a conclusion")
+    if result_evidence_required and review.get("result_evidence_visible") is False:
+        review["pass"] = False
+        if not any("result evidence" in str(issue) for issue in issues):
+            issues.append(
+                "result evidence does not clearly show the supplied baseline, "
+                "target, actual result, and time period"
+            )
+    return review
+
+
+def enforce_deck_visual_quality_gate(review: dict[str, Any]) -> dict[str, Any]:
+    review = enforce_ai_aesthetic_gate(review)
+    issues = review.setdefault("issues", [])
+    if not isinstance(issues, list):
+        issues = []
+        review["issues"] = issues
+    for field in (
+        "graphic_rhythm",
+        "executive_glanceability",
+        "narration_support",
+        "visual_completeness",
+    ):
+        if review.get(field) is False:
+            review["pass"] = False
+            if not any(field in str(issue) for issue in issues):
+                issues.append(f"{field} failed at deck level")
+    overly_sparse_slides = review.get("overly_sparse_slides", [])
+    if isinstance(overly_sparse_slides, list) and overly_sparse_slides:
+        review["pass"] = False
+        if not any("overly sparse" in str(issue) for issue in issues):
+            issues.append(
+                "overly sparse slides: "
+                + ", ".join(str(item) for item in overly_sparse_slides)
+            )
+    if review.get("text_and_line_dominance") is True:
+        review["pass"] = False
+        if not any("text and line" in str(issue) for issue in issues):
+            issues.append("the deck is dominated by text, thin rules, boxes, and arrows")
+    if review.get("material_form_diversity") is False:
+        review["pass"] = False
+        if not any("material form" in str(issue) for issue in issues):
+            issues.append("material form diversity failed at deck level")
+    if str(review.get("semantic_visual_coverage", "")).lower() == "low":
+        review["pass"] = False
+        if not any("semantic visual coverage" in str(issue) for issue in issues):
+            issues.append("semantic visual coverage is low at deck level")
+    if str(review.get("speaker_dependency", "")).lower() == "high":
+        review["pass"] = False
+        if not any("speaker dependency" in str(issue) for issue in issues):
+            issues.append("speaker dependency is high at deck level")
+    for field, label in (
+        ("overly_speaker_dependent_slides", "overly speaker-dependent slides"),
+        ("topic_only_titles", "topic-only titles"),
+        ("result_evidence_gaps", "result-evidence gaps"),
+    ):
+        values = review.get(field, [])
+        if isinstance(values, list) and values:
+            review["pass"] = False
+            if not any(label in str(issue) for issue in issues):
+                issues.append(label + ": " + ", ".join(str(item) for item in values))
+    return review
+
+
 def review_with_kimi(
     plan: dict[str, Any],
     slide: dict[str, Any],
@@ -76,11 +217,20 @@ def review_with_kimi(
     source_asset_refs = slide.get("source_asset_refs", [])
     layout_family = slide.get("layout_family", slide["information_topology"])
     graphic_devices = slide.get("graphic_devices", [])
+    graphic_role = resolved_graphic_role(plan, slide)
+    graphic_area_ratio = resolved_graphic_area_ratio(plan, slide)
+    max_accent_ratio = max_accent_graphic_area_ratio(plan)
+    semantic_visual_anchor = str(slide.get("semantic_visual_anchor") or "")
+    material_form = str(slide.get("material_form") or "not declared")
+    result_evidence = result_evidence_items(slide)
+    semantic_anchor_required = graphic_role in {"accent", "explanatory", "evidence"}
+    result_evidence_required = bool(result_evidence)
     title_render_mode = resolved_title_render_mode(plan, slide)
     expected_image_text = image_rendered_text(plan, slide)
     prompt = (
         "Review this generated PowerPoint slide. "
         f"Intended message: {slide['message']}. "
+        f"Conclusion-led title: {slide['title']}. "
         f"Narrative role: {slide['narrative_role']}. "
         f"Thesis expression: {slide['thesis_expression']}. "
         f"Content boundary: {slide['content_boundary']}. "
@@ -92,6 +242,13 @@ def review_with_kimi(
         f"Source asset references: {json.dumps(source_asset_refs, ensure_ascii=False)}. "
         f"Layout family: {layout_family}. "
         f"Approved graphic devices: {json.dumps(graphic_devices, ensure_ascii=False)}. "
+        f"Material form: {material_form}. "
+        f"Required non-text semantic visual anchor: {semantic_visual_anchor or 'none'}. "
+        f"Result evidence: {json.dumps(result_evidence, ensure_ascii=False)}. "
+        f"Language policy: {language_policy_description(plan)} "
+        f"Graphic role: {graphic_role}. "
+        f"Planned graphic area ratio: {graphic_area_ratio}. "
+        f"Maximum accent graphic area ratio: {max_accent_ratio}. "
         f"Title render mode: {title_render_mode}. "
         f"Expected image-rendered text: {json.dumps(expected_image_text, ensure_ascii=False)}. "
         "When title render mode is native, reject a title, title placeholder, or "
@@ -108,15 +265,36 @@ def review_with_kimi(
         "every depicted object against the content boundary. When thesis "
         "expression is implicit, reject any literal solution, target "
         "architecture, future-state workflow, or outcome that the page has not "
-        "yet earned. Also review authorship quality. Flag standard AI-default "
+        "yet earned. Evaluate the complete visual result before judging individual "
+        "devices. The page should be aesthetically resolved, simple, immediately "
+        "understandable, and easy for an executive speaker to narrate. Reject a "
+        "visually barren page made mostly of text, thin rules, and empty space when "
+        "the declared graphic role calls for an accent, explanation, or evidence "
+        "object. For accent pages, prefer one or two semantic graphic accents and "
+        "keep them within the configured area limit. Frameworks, process diagrams, "
+        "concept diagrams, charts, and source evidence may exceed that limit because "
+        "they carry information. Also review authorship quality. Flag standard AI-default "
         "visual devices when they are not required by the content: repeated "
         "rounded-card grids, circular icon badges, symmetric hub-and-spoke "
         "layouts, glowing AI brains or chips, decorative arrows, generic fake "
         "dashboards, excessive line icons, and polished-but-unspecific technology "
-        "scenery. Flag formulaic copy, empty slogans, mechanically balanced "
+        "scenery when they dominate or repeat without purpose. Do not reject a card, "
+        "icon, hub, or arrow merely because it exists; judge whether it supports the "
+        "message and whether the overall composition feels coherent rather than "
+        "templated. Flag formulaic copy, empty slogans, mechanically balanced "
         "three-part phrases, or a page that looks assembled from a generic SaaS "
         "infographic kit. Do not penalize a clean or symmetric page by itself; "
         "penalize repetition, generic symbolism, or decoration without evidence. "
+        "Assess speaker dependency explicitly. The title plus the visual should let "
+        "a senior leader recover the main conclusion and relationship within a few "
+        "seconds; narration may add context but must not supply the missing logic. "
+        "A semantic anchor must be more than text arranged inside boxes: it should be "
+        "a source object, data pattern, business object, domain silhouette, framework, "
+        "process, spatial system, or concept visual that carries meaning. Check that "
+        "the title states a conclusion rather than a generic topic. When result "
+        "evidence is supplied, prioritize and verify baseline, target, actual result, "
+        "and time period. Use Traditional Chinese for prose while preserving protected "
+        "English technical terms exactly. "
         "If source assets are declared, confirm that the slide visibly uses or "
         "faithfully represents them instead of replacing them with synthetic "
         "evidence. The "
@@ -131,7 +309,18 @@ def review_with_kimi(
         '"thesis_leakage_absent": boolean, "ai_aesthetic_risk": '
         '"low|medium|high", "standard_ai_elements": [string], '
         '"copy_cliche_absent": boolean, "source_specificity": '
-        '"low|medium|high", "editorial_authorship": boolean}.'
+        '"low|medium|high", "editorial_authorship": boolean, '
+        '"graphic_balance": "too_sparse|balanced|too_dominant", '
+        '"estimated_graphic_area_ratio": number from 0 to 1, '
+        '"semantic_graphics_present": boolean, '
+        '"semantic_visual_anchor_match": boolean, '
+        '"visual_semantic_load": "low|medium|high", '
+        '"text_container_dominance": boolean, '
+        '"speaker_dependency": "low|medium|high", '
+        '"language_policy_respected": boolean, '
+        '"title_conclusion_led": boolean, "result_evidence_visible": boolean, '
+        '"executive_glanceability": boolean, "narration_support": boolean, '
+        '"visual_completeness": boolean}.'
     )
     payload = {
         "model": model,
@@ -153,7 +342,13 @@ def review_with_kimi(
     response = post_json(endpoint, api_key, payload, timeout)
     try:
         content = response["choices"][0]["message"]["content"]
-        return enforce_ai_aesthetic_gate(parse_json_content(content))
+        return enforce_visual_balance_gate(
+            parse_json_content(content),
+            graphic_role,
+            max_accent_ratio,
+            semantic_anchor_required,
+            result_evidence_required,
+        )
     except (KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"Unexpected Kimi review response: {response}") from exc
 
@@ -179,6 +374,11 @@ def review_deck_style_with_kimi(
                 "layout_family", slide.get("information_topology")
             ),
             "visual_source": slide.get("visual_source", "not declared"),
+            "graphic_role": resolved_graphic_role(plan, slide),
+            "graphic_area_ratio": resolved_graphic_area_ratio(plan, slide),
+            "material_form": slide.get("material_form", "not declared"),
+            "semantic_visual_anchor": slide.get("semantic_visual_anchor", ""),
+            "result_evidence": result_evidence_items(slide),
             "title_render_mode": resolved_title_render_mode(plan, slide),
         }
         for slide in slides
@@ -192,16 +392,38 @@ def review_deck_style_with_kimi(
         "structures, excessive symmetry, and synthetic technology scenery. Inspect "
         "copy rhythm for repeated formulas such as not-X-but-Y, from-X-to-Y, and "
         "first-X-then-Y. Check whether evidence, plain typographic pages, tables, "
-        "charts, screenshots, and diagrams create an intentional rhythm. Do not fail "
+        "charts, screenshots, diagrams, and restrained illustrative accents create "
+        "an intentional rhythm. Check for visual completeness: the deck should not "
+        "collapse into text blocks, thin rules, and large empty areas. Necessary "
+        "framework, process, and narrative-concept pages may use ImageGen visuals as "
+        "the information-bearing centerpiece. Accent graphics should normally stay "
+        "within 30% of the usable content area, while information-bearing visuals may "
+        "be larger. Judge beauty, simplicity, glanceability, and narration support "
+        "from an executive audience's perspective. Do not fail "
         "a deck merely for consistent branding; fail it when consistency erases "
         "editorial selection or when generic visual devices substitute for content. "
+        "Fail the deck when most pages communicate through text, thin rules, boxes, "
+        "and arrows while the visual carries little meaning. Identify slides whose "
+        "main logic depends on an unusually skilled speaker. Check that content-slide "
+        "titles state conclusions, not generic topics such as project results or "
+        "platform architecture. Check that result pages foreground supplied baseline, "
+        "target, actual result, and time period. Prose should be Traditional Chinese "
+        "while protected technical abbreviations remain in English. "
         f"Slide contract: {json.dumps(slide_contract, ensure_ascii=False)}. "
         'Return JSON only: {"pass": boolean, "issues": [string], '
         '"ai_aesthetic_risk": "low|medium|high", '
         '"repeated_layouts": [string], "formulaic_copy": [string], '
         '"generic_visual_devices": [string], '
         '"material_specificity": "low|medium|high", '
-        '"editorial_rhythm": boolean, "recommended_changes": [string]}.'
+        '"editorial_rhythm": boolean, "graphic_rhythm": boolean, '
+        '"text_and_line_dominance": boolean, "material_form_diversity": boolean, '
+        '"semantic_visual_coverage": "low|medium|high", '
+        '"speaker_dependency": "low|medium|high", '
+        '"overly_sparse_slides": [string], "executive_glanceability": boolean, '
+        '"overly_speaker_dependent_slides": [string], '
+        '"topic_only_titles": [string], "result_evidence_gaps": [string], '
+        '"narration_support": boolean, "visual_completeness": boolean, '
+        '"recommended_changes": [string]}.'
     )
     payload = {
         "model": model,
@@ -226,7 +448,7 @@ def review_deck_style_with_kimi(
     response = post_json(endpoint, api_key, payload, timeout)
     try:
         content = response["choices"][0]["message"]["content"]
-        return enforce_ai_aesthetic_gate(parse_json_content(content))
+        return enforce_deck_visual_quality_gate(parse_json_content(content))
     except (KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"Unexpected Kimi deck review response: {response}") from exc
 

@@ -18,10 +18,15 @@ from credential_store import get_provider_secret
 from deck_utils import (
     image_rendered_text,
     iter_slides,
+    language_policy_description,
     load_plan,
+    max_accent_graphic_area_ratio,
     palette_description,
     resolve_path,
+    resolved_graphic_area_ratio,
+    resolved_graphic_role,
     resolved_title_render_mode,
+    result_evidence_items,
 )
 from validate_plan import validate_plan
 
@@ -41,6 +46,53 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
     source_asset_refs = "; ".join(slide.get("source_asset_refs", [])) or "none"
     layout_family = slide.get("layout_family", slide["information_topology"])
     graphic_devices = "; ".join(slide.get("graphic_devices", [])) or "only devices justified by the content"
+    graphic_role = resolved_graphic_role(plan, slide)
+    graphic_area_ratio = resolved_graphic_area_ratio(plan, slide)
+    max_accent_ratio = max_accent_graphic_area_ratio(plan)
+    max_accent_percent = round(max_accent_ratio * 100)
+    language_instruction = language_policy_description(plan)
+    material_form = str(slide.get("material_form") or "not declared")
+    semantic_visual_anchor = str(
+        slide.get("semantic_visual_anchor") or "not declared"
+    )
+    result_evidence = result_evidence_items(slide)
+    if result_evidence:
+        evidence_instruction = (
+            "Prioritize this result evidence in the main visual: "
+            + "; ".join(
+                f"{key}={value}" for key, value in result_evidence.items()
+            )
+            + ". Show baseline, target, actual result, and time period together "
+            "when supplied; preserve every value and unit exactly. "
+        )
+    else:
+        evidence_instruction = (
+            "Do not invent a baseline, target, actual result, time period, or KPI. "
+        )
+    if graphic_role == "accent":
+        target_percent = round((graphic_area_ratio or max_accent_ratio) * 100)
+        graphic_instruction = (
+            "Use one or two semantic graphic accents or a compact illustrative "
+            f"vignette occupying about {target_percent}% of the usable content area "
+            f"and never more than {max_accent_percent}%. Do not make the page "
+            "text-only or line-only when a visual cue would improve comprehension. "
+        )
+    elif graphic_role in {"explanatory", "evidence"}:
+        graphic_instruction = (
+            "The chart, framework, process, concept diagram, screenshot, or evidence "
+            "object is information-bearing and may occupy more than the accent cap. "
+            f"Keep any secondary decorative graphics within {max_accent_percent}%. "
+        )
+    elif graphic_role == "none":
+        graphic_instruction = (
+            "This is an intentionally typography-led page. Do not add an illustration, "
+            "but maintain a complete composition through scale, spacing, and alignment. "
+        )
+    else:
+        graphic_instruction = (
+            "Use meaningful graphic accents when they improve scanning or explanation. "
+            "Do not interpret anti-template constraints as a ban on graphics. "
+        )
     title_render_mode = resolved_title_render_mode(plan, slide)
     if title_render_mode == "native":
         title_instruction = (
@@ -104,6 +156,7 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
         f"{thesis_context}"
         f"Audience question: {slide['audience_question']}. "
         f"Message: {slide['message']}. "
+        f"Conclusion-led native title copy: {slide['title']}. "
         f"Claim type: {slide['claim_type']}. "
         f"Information topology: {slide['information_topology']}. "
         f"Visual subject: {slide['visual_subject']}. "
@@ -111,25 +164,38 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
         f"Visual reasoning: {slide['visual_reasoning']}. "
         f"Visual source: {visual_source}. Source asset references: {source_asset_refs}. "
         f"Layout family: {layout_family}. Approved graphic devices: {graphic_devices}. "
+        f"Material form: {material_form}. "
+        f"Non-text semantic visual anchor: {semantic_visual_anchor}. The anchor must "
+        "be visibly recognizable and carry at least one layer of meaning before "
+        "the labels are read; text boxes, thin rules, arrows, or empty containers "
+        "alone do not satisfy it. "
+        f"Graphic role: {graphic_role}. {graphic_instruction}"
         f"Title render mode: {title_render_mode}. {title_instruction}"
         f"{provenance_instruction}"
         f"Non-visible transition cue for composition only: "
         f"{slide['transition']['to_next']}. "
         f"Verified facts only: {facts}. "
+        f"{evidence_instruction}"
+        f"Language policy: {language_instruction} "
         f"Exact palette: {palette_description(plan['palette'])}. "
         f"Visual style: {generation.get('style', 'clean executive presentation')}. "
         f"{text_constraint} "
         f"Use a pure solid {plan['palette']['background']} background with no "
         "background photo, texture, pattern, glow, or scenic wallpaper. Allow "
-        "restrained nodes, connectors, paths, containers, icons, and pale color "
-        "blocks when they encode relationships. Use one dominant visual system, "
-        "clear hierarchy, generous margins, and a restrained style suitable for "
-        "an executive decision meeting. Do not fill whitespace with generic line "
-        "icons, circular badges, rounded-card grids, a glowing AI brain or chip, "
-        "a symmetric hub-and-spoke, fake dashboard chrome, or decorative arrows. "
-        "Use typography, source evidence, native charts, plain tables, and direct "
-        "annotation before introducing a symbolic illustration. Use asymmetry only "
-        "when it clarifies priority; do not manufacture visual complexity. "
+        "restrained nodes, connectors, paths, containers, icons, domain silhouettes, "
+        "compact 2D illustrations, and pale color blocks when they improve scanning "
+        "or encode relationships. Judge the page as a complete visual composition: "
+        "beautiful, simple, immediately understandable, and easy for an executive "
+        "speaker to narrate. The title and visual must communicate the main logic "
+        "without depending on an unusually skilled speaker; narration should add "
+        "context, not supply the missing argument. Use one dominant reading path "
+        "and a clear hierarchy. "
+        "Do not repeat generic line-icon rows, circular badges, rounded-card grids, "
+        "a glowing AI brain or chip, a symmetric hub-and-spoke, fake dashboard chrome, "
+        "or arrows without a real relationship. These devices are not absolutely "
+        "forbidden; use an individual one only when the content genuinely needs it "
+        "and the overall page does not look templated. Use asymmetry only when it "
+        "clarifies priority; do not manufacture visual complexity. "
         f"Avoid: {negative}."
     )
     custom_prompt = str(slide.get("prompt", "")).strip()

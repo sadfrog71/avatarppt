@@ -7,42 +7,46 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
 ```json
 {
   "output": "outputs/example.pptx",
-  "cover_title": "项目成果汇报",
-  "footer": "平行数字  交叉现实",
-  "audience": "管理层",
-  "objective": "形成项目决策共识",
+  "cover_title": "專案成果匯報",
+  "footer": "平行數字  交叉現實",
+  "audience": "管理層",
+  "objective": "形成專案決策共識",
+  "language": {
+    "primary": "zh-Hant",
+    "preserve_terms": ["AI", "KPI", "FDE", "SCADA"]
+  },
   "storyline": {
-    "core_thesis": "统一知识与流程底座是智能体规模化复制的前提",
-    "decision_request": "确认一期建设范围、责任人和评估口径",
+    "core_thesis": "統一知識與流程底座是智能體規模化複製的前提",
+    "decision_request": "確認一期建設範圍、責任人和評估口徑",
     "audience_priority": [
-      "业务价值",
+      "業務價值",
       "落地可行性",
-      "投入与风险"
+      "投入與風險"
     ],
     "story_arc": [
       {
-        "move": "判断",
-        "question": "为什么现在需要推进？",
-        "answer": "现有点状能力难以形成可复制的业务闭环"
+        "move": "判斷",
+        "question": "為什麼現在需要推進？",
+        "answer": "現有點狀能力難以形成可複製的業務閉環"
       },
       {
         "move": "方案",
-        "question": "应该建设什么？",
-        "answer": "先统一知识与流程底座，再分场景扩展智能体"
+        "question": "應該建設什麼？",
+        "answer": "先統一知識與流程底座，再分場景擴展智能體"
       },
       {
-        "move": "决策",
-        "question": "管理层今天要确认什么？",
-        "answer": "一期范围、责任人和评估口径"
+        "move": "決策",
+        "question": "管理層今天要確認什麼？",
+        "answer": "一期範圍、責任人和評估口徑"
       }
     ]
   },
   "storyline_review": {
     "status": "pass",
-    "thesis_alignment": "每页都在证明、解释或落实中心判断",
-    "executive_relevance": "价值、可行性、风险与责任边界足以支撑本次决策",
-    "flow": "相邻页面可用因为、但是或所以自然连接",
-    "visual_consistency": "白色底板、关系驱动构图、统一视觉语法、主次清晰",
+    "thesis_alignment": "每頁都在證明、解釋或落實中心判斷",
+    "executive_relevance": "價值、可行性、風險與責任邊界足以支撐本次決策",
+    "flow": "相鄰頁面可用因為、但是或所以自然連接",
+    "visual_consistency": "白色底板、關係驅動構圖、統一視覺語法、主次清晰",
     "open_issues": []
   },
   "include_cover": true,
@@ -58,11 +62,16 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
     "max_exact_text_items": 14,
     "max_exact_text_characters": 220,
     "max_standard_ai_device_ratio": 0.35,
+    "max_typography_first_ratio": 0.35,
+    "max_same_material_form_ratio": 0.55,
+    "require_conclusion_titles": true,
+    "require_semantic_visual_anchor": true,
+    "require_result_evidence_on_metrics": true,
     "allowed_formulaic_titles": [],
     "allowed_cliche_terms": []
   },
   "palette": {
-    "name": "青绿科技",
+    "name": "青綠科技",
     "primary": "#0B6E69",
     "secondary": "#174A5B",
     "accent": "#F2B134",
@@ -78,6 +87,7 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
     "composition_mode": "direct_imagegen_slide",
     "background_mode": "solid",
     "allow_nonwhite_background": false,
+    "max_accent_graphic_area_ratio": 0.30,
     "style": "clean executive technology presentation",
     "negative_prompt": "no watermark, no logo, no duplicated text, no cropped text, no gradient background, no photo background, no texture, no pattern, no excessive glow, no scenic wallpaper, no disconnected card collection, no excessive ornament"
   },
@@ -98,46 +108,59 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
 
 ```json
 {
-  "main_title": "应用成效（一）",
-  "subtitle": "运营效率全面提升",
+  "main_title": "應用成效（一）",
+  "subtitle": "營運風險識別由被動轉向提前預警",
   "slides": [
     {
       "id": "s1-01",
-      "title": "核心流程效率已具备量化验证基础",
-      "audience_question": "一期建设是否已经产生可验证的业务价值？",
-      "message": "核心流程效率得到可量化提升",
+      "title": "提前36小時識別風險，減少被動處置",
+      "audience_question": "一期建設是否已產生可驗證的業務價值？",
+      "message": "風險識別提前量已超過既定目標",
       "claim_type": "fact",
-      "narrative_role": "成效证据页：证明一期建设已产生可验证价值",
+      "narrative_role": "成效證據頁：證明一期建設已產生可驗證價值",
       "thesis_expression": "implicit",
-      "content_boundary": "仅呈现用户提供的前后效率证据；不展示后续平台方案、目标架构或决策请求",
-      "thesis_connection": "通过可量化证据增强建设主张的可信度，但不直接复述整套主旨",
+      "content_boundary": "僅呈現使用者提供的風險識別證據；不展示後續平台方案、目標架構或決策請求",
+      "thesis_connection": "透過可量化證據增強建設主張的可信度，但不直接複述整套主旨",
       "layout_type": "metrics",
       "title_render_mode": "native",
       "information_topology": "comparison",
       "visual_source": "native_chart",
       "source_asset_refs": [
-        "source/efficiency-metrics.xlsx"
+        "source/risk-warning-metrics.xlsx"
       ],
       "layout_family": "evidence_comparison",
+      "material_form": "data_visual",
+      "graphic_role": "evidence",
+      "graphic_area_ratio": 0.55,
+      "semantic_visual_anchor": "基線、目標與實際提前量的三段對比圖",
       "graphic_devices": [
-        "native before-after chart",
+        "native baseline-target-actual chart",
         "source note"
       ],
       "exact_text": [
-        "处理时长",
-        "自动化率"
+        "基線：平均提前6小時",
+        "目標：提前24小時",
+        "實際：提前36小時",
+        "週期：2026年1—6月"
       ],
-      "facts": [
-        "只放用户提供且可核实的数据"
-      ],
-      "visual_subject": "运营指挥中心与数据流程",
-      "visual_focus": "一组占据页面中心的前后效率对比指标",
-      "visual_reasoning": "前后指标需要在同一坐标中直接比较，比较结构比中心辐射更适合",
-      "transition": {
-        "from_previous": "承接上一页对一期建设目标的说明",
-        "to_next": "价值已得到验证，下一页回答如何把单点成果复制到更多场景"
+      "result_evidence": {
+        "baseline": "平均提前6小時",
+        "target": "提前24小時",
+        "actual": "提前36小時",
+        "time_period": "2026年1—6月",
+        "source_ref": "source/risk-warning-metrics.xlsx"
       },
-      "speaker_notes": "先讲结论，再解释口径和数据来源，最后引出规模化复制问题。",
+      "facts": [
+        "只使用使用者提供且可核實的數據"
+      ],
+      "visual_subject": "SCADA風險預警與營運處置流程",
+      "visual_focus": "頁面中心的基線、目標與實際提前量對比",
+      "visual_reasoning": "三組同口徑數值需要在同一尺度直接比較，數據對比比中心輻射更適合",
+      "transition": {
+        "from_previous": "承接上一頁對一期建設目標的說明",
+        "to_next": "價值已得到驗證，下一頁回答如何把單點成果複製到更多場景"
+      },
+      "speaker_notes": "先講結論，再解釋口徑和數據來源，最後引出規模化複製問題。",
       "prompt": "",
       "image": "images/s1-01.png"
     }
@@ -165,6 +188,12 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
   Ratio thresholds must be between 0 and 1. Keep
   `allowed_formulaic_titles` and `allowed_cliche_terms` narrow and source-
   justified.
+- For new executive plans, set `language.primary=zh-Hant`. Write prose in
+  Traditional Chinese while preserving exact English abbreviations in
+  `language.preserve_terms`, including `AI`, `KPI`, `FDE`, and `SCADA` unless
+  the source requires another policy.
+- Set `image_generation.max_accent_graphic_area_ratio` to a value greater than
+  0 and no greater than 0.30. The default is 0.30.
 - Keep `exact_text` concise and designed for the page. Short labels should
   normally be under 18 Chinese characters, but thesis lines, KPI captions, and
   evidence points may be longer when they are necessary for the slide to carry
@@ -185,8 +214,9 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
   through evidence, tension, continuity, or transition. Thesis alignment does
   not require repeating or literally illustrating the thesis.
 - Make `audience_question` the question the page answers and `message` the
-  conclusion. Except for cover, chapter, and closing pages, prefer a
-  conclusion-led `title` over a topic label.
+  conclusion. Except for cover, chapter, and closing pages, write the `title`
+  as the conclusion itself. Prefer “提前36小時識別風險，減少被動處置” over a
+  topic label such as “專案成效” or “平台架構”.
 - Read all titles as one sequence. Keep contrast formulas such as
   “不是……而是……”, “从……到……”, and “先……再……” below the configured ratio unless
   the source argument genuinely depends on that contrast. Mix fact-led,
@@ -205,14 +235,30 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
   `native_diagram`, `generated_visual`, or `mixed`. Record traceable screenshots,
   documents, tables, charts, photos, or identifiers in `source_asset_refs`.
   Give each page a concise `layout_family` so the static audit can detect deck-
-  level repetition. Use `graphic_devices` as an allow-list; do not list icons,
-  cards, badges, hubs, arrows, rings, dashboards, or 2.5D scenes unless they
-  explain real content.
+  level repetition. Set `graphic_role` to `accent`, `explanatory`, `evidence`,
+  or intentional `none`, and estimate `graphic_area_ratio` from 0 to 1. Default
+  conceptual pages to `accent` at roughly 0.15-0.30. Frameworks, processes,
+  narrative concepts, charts, screenshots, and source objects may use
+  `explanatory` or `evidence` and exceed 0.30 because they carry information.
+  Declare `material_form` as `typography`, `source_evidence`, `data_visual`,
+  `diagram`, `illustration`, `table`, or `mixed`. For every non-typographic
+  graphic role, write one `semantic_visual_anchor`: the non-text object, data
+  pattern, framework, process, spatial system, or concept visual that carries
+  at least one layer of meaning. “Three columns”, “large text”, “arrows”, and
+  empty boxes are layout instructions, not semantic anchors.
+  Use `graphic_devices` as an allow-list; individual icons, cards, hubs, arrows,
+  or illustrations are acceptable when relevant, but do not repeat them as a
+  generic deck-wide visual system.
 - Write `transition.from_previous` and `transition.to_next` for every content
   slide. Read them in sequence before generation; adjacent pages must connect
   causally rather than only share a topic.
 - Put explanations needed for delivery in `speaker_notes`; keep generated image
-  text concise.
+  text concise. The title plus the visual should communicate the main conclusion
+  and relationship without depending on an unusually skilled speaker.
+- On metrics and outcome pages, add `result_evidence` with `baseline`, `target`,
+  `actual`, and `time_period`; use `null` only to record a genuine source gap.
+  Put supplied values in the title or `exact_text`, keep units and dates exact,
+  and record `source_ref`. Never invent a missing baseline or result.
 - Treat `exact_text` as the exclusive visible-copy contract. Do not render
   `core_thesis`, `decision_request`, planning field names, transitions, or
   speaker notes unless the intended words are also present in `exact_text`.
@@ -245,7 +291,9 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
   deck.
 - Before paid generation, run `scripts/audit_deck_style.py`. Resolve high-risk
   formulaic copy, dense generated text, dominant layout families, long repeated
-  runs, undeclared evidence sources, and common AI-default visual devices.
+  runs, topic-only titles, overused typography-first or single material forms,
+  undeclared evidence sources, missing semantic anchors, incomplete result
+  evidence, excessive planned graphics, and common AI-default visual devices.
 - Set `vision_review.deck_style_review=true` only after confirming one
   additional paid Kimi call. The review uses the ordered contact sheet to judge
   repeated layouts, generic visual grammar, material specificity, copy rhythm,

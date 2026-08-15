@@ -1,41 +1,50 @@
 {
   "output": "outputs/avatarppt-demo.pptx",
-  "cover_title": "项目成果汇报",
-  "footer": "平行数字  交叉现实",
-  "audience": "管理层",
-  "objective": "形成项目决策共识",
+  "cover_title": "專案成果匯報",
+  "footer": "平行數字  交叉現實",
+  "audience": "管理層",
+  "objective": "形成專案決策共識",
+  "language": {
+    "primary": "zh-Hant",
+    "preserve_terms": [
+      "AI",
+      "KPI",
+      "FDE",
+      "SCADA"
+    ]
+  },
   "storyline": {
-    "core_thesis": "统一知识与流程底座是智能体规模化复制的前提",
-    "decision_request": "确认一期建设范围、责任人和评估口径",
+    "core_thesis": "統一知識與流程底座是智能體規模化複製的前提",
+    "decision_request": "確認一期建設範圍、責任人和評估口徑",
     "audience_priority": [
-      "业务价值",
+      "業務價值",
       "落地可行性",
-      "投入与风险"
+      "投入與風險"
     ],
     "story_arc": [
       {
-        "move": "判断",
-        "question": "为什么现在需要推进？",
-        "answer": "点状能力难以形成可复制的业务闭环"
+        "move": "判斷",
+        "question": "為什麼現在需要推進？",
+        "answer": "點狀能力難以形成可複製的業務閉環"
       },
       {
         "move": "方案",
-        "question": "应该建设什么？",
-        "answer": "先统一知识与流程底座，再分场景扩展智能体"
+        "question": "應該建設什麼？",
+        "answer": "先統一知識與流程底座，再分場景擴展智能體"
       },
       {
-        "move": "决策",
-        "question": "管理层今天要确认什么？",
-        "answer": "一期范围、责任人和评估口径"
+        "move": "決策",
+        "question": "管理層今天要確認什麼？",
+        "answer": "一期範圍、責任人和評估口徑"
       }
     ]
   },
   "storyline_review": {
     "status": "pass",
-    "thesis_alignment": "每页都在证明、解释或落实中心判断",
-    "executive_relevance": "价值、可行性、风险与责任边界足以支撑本次决策",
-    "flow": "相邻页面可用因为、但是或所以自然连接",
-    "visual_consistency": "白色底板、关系驱动构图、统一视觉语法、主次清晰",
+    "thesis_alignment": "每頁都在證明、解釋或落實中心判斷",
+    "executive_relevance": "價值、可行性、風險與責任邊界足以支撐本次決策",
+    "flow": "相鄰頁面可用因為、但是或所以自然連接",
+    "visual_consistency": "白色底板、關係驅動構圖、統一視覺語法、主次清晰",
     "open_issues": []
   },
   "include_cover": true,
@@ -51,11 +60,16 @@
     "max_exact_text_items": 14,
     "max_exact_text_characters": 220,
     "max_standard_ai_device_ratio": 0.35,
+    "max_typography_first_ratio": 0.35,
+    "max_same_material_form_ratio": 0.55,
+    "require_conclusion_titles": true,
+    "require_semantic_visual_anchor": true,
+    "require_result_evidence_on_metrics": true,
     "allowed_formulaic_titles": [],
     "allowed_cliche_terms": []
   },
   "palette": {
-    "name": "青绿科技",
+    "name": "青綠科技",
     "primary": "#0B6E69",
     "secondary": "#174A5B",
     "accent": "#F2B134",
@@ -71,8 +85,9 @@
     "composition_mode": "direct_imagegen_slide",
     "background_mode": "solid",
     "allow_nonwhite_background": false,
+    "max_accent_graphic_area_ratio": 0.30,
     "style": "clean executive technology presentation",
-    "negative_prompt": "no watermark, no logo, no duplicated text, no cropped text, no gradient background, no photo background, no texture, no pattern, no excessive glow, no scenic wallpaper, no disconnected card collection, no generic line-icon filler, no circular icon badges, no repeated rounded-card grid, no glowing AI brain or chip, no fake dashboard, no decorative arrows, no automatic symmetric hub-and-spoke, no excessive ornament"
+    "negative_prompt": "no watermark, no logo, no duplicated text, no cropped text, no gradient background, no photo background, no texture, no pattern, no excessive glow, no scenic wallpaper, no disconnected card collection, no repeated generic line-icon filler, no automatic circular icon badges, no repeated rounded-card grid, no glowing AI brain or chip, no fake dashboard, no arrows without relationships, no automatic symmetric hub-and-spoke, no excessive ornament"
   },
   "vision_review": {
     "enabled": true,
@@ -85,46 +100,59 @@
   },
   "sections": [
     {
-      "main_title": "应用成效（一）",
-      "subtitle": "运营效率全面提升",
+      "main_title": "應用成效（一）",
+      "subtitle": "營運風險識別由被動轉向提前預警",
       "slides": [
         {
           "id": "s1-01",
-          "title": "核心流程效率已具备量化验证基础",
-          "audience_question": "一期建设是否已经产生可验证的业务价值？",
-          "message": "核心流程效率得到可量化提升",
+          "title": "提前36小時識別風險，減少被動處置",
+          "audience_question": "一期建設是否已產生可驗證的業務價值？",
+          "message": "風險識別提前量已超過既定目標",
           "claim_type": "fact",
-          "narrative_role": "成效证据页：证明一期建设已产生可验证价值",
+          "narrative_role": "成效證據頁：證明一期建設已產生可驗證價值",
           "thesis_expression": "implicit",
-          "content_boundary": "仅呈现用户提供的前后效率证据；不展示后续平台方案、目标架构或决策请求",
-          "thesis_connection": "通过可量化证据增强建设主张的可信度，但不直接复述整套主旨",
+          "content_boundary": "僅呈現使用者提供的風險識別證據；不展示後續平台方案、目標架構或決策請求",
+          "thesis_connection": "透過可量化證據增強建設主張的可信度，但不直接複述整套主旨",
           "layout_type": "metrics",
           "title_render_mode": "native",
           "information_topology": "comparison",
           "visual_source": "native_chart",
           "source_asset_refs": [
-            "source/efficiency-metrics.xlsx"
+            "source/risk-warning-metrics.xlsx"
           ],
           "layout_family": "evidence_comparison",
+          "material_form": "data_visual",
+          "graphic_role": "evidence",
+          "graphic_area_ratio": 0.55,
+          "semantic_visual_anchor": "基線、目標與實際提前量的三段對比圖",
           "graphic_devices": [
-            "native before-after chart",
+            "native baseline-target-actual chart",
             "source note"
           ],
           "exact_text": [
-            "处理时长",
-            "自动化率"
+            "基線：平均提前6小時",
+            "目標：提前24小時",
+            "實際：提前36小時",
+            "週期：2026年1—6月"
           ],
-          "facts": [
-            "只使用用户提供且可核实的数据"
-          ],
-          "visual_subject": "运营指挥中心与数据流程",
-          "visual_focus": "页面中心的前后效率对比指标",
-          "visual_reasoning": "前后指标需要在同一坐标中直接比较，比较结构比中心辐射更适合",
-          "transition": {
-            "from_previous": "承接上一页对一期建设目标的说明",
-            "to_next": "价值已得到验证，下一页回答如何把单点成果复制到更多场景"
+          "result_evidence": {
+            "baseline": "平均提前6小時",
+            "target": "提前24小時",
+            "actual": "提前36小時",
+            "time_period": "2026年1—6月",
+            "source_ref": "source/risk-warning-metrics.xlsx"
           },
-          "speaker_notes": "先讲结论，再解释数据口径，最后引出规模化复制问题。",
+          "facts": [
+            "只使用使用者提供且可核實的數據"
+          ],
+          "visual_subject": "SCADA風險預警與營運處置流程",
+          "visual_focus": "頁面中心的基線、目標與實際提前量對比",
+          "visual_reasoning": "三組同口徑數值需要在同一尺度直接比較，數據對比比中心輻射更適合",
+          "transition": {
+            "from_previous": "承接上一頁對一期建設目標的說明",
+            "to_next": "價值已得到驗證，下一頁回答如何把單點成果複製到更多場景"
+          },
+          "speaker_notes": "先講結論，再解釋數據口徑，最後引出規模化複製問題。",
           "prompt": "",
           "image": "images/s1-01.png"
         }

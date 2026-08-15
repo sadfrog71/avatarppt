@@ -17,7 +17,7 @@ as a decorated outline.
 Before planning pages, write four items:
 
 - `core_thesis`: the single judgment the audience should remember. Make it a
-  specific conclusion, not a topic such as "AI 建设汇报".
+  specific conclusion, not a topic such as "AI 建設匯報".
 - `decision_request`: the decision, approval, alignment, or next action needed
   from the audience.
 - `audience_priority`: the 1-3 issues the audience will judge first, such as
@@ -73,6 +73,9 @@ For every content slide define:
   tension, visual continuity, or transition without automatically restating it.
 - `claim_type`: `fact`, `inference`, `proposal`, or `decision`.
 - `facts`: source-backed evidence. Keep assumptions visibly separate from facts.
+- `result_evidence`: for KPI and outcome pages, the baseline, target, actual
+  result, and time period. Preserve source units and record a missing item as a
+  gap instead of inventing it.
 - `information_topology`: how the ideas relate, such as shared center, cause and
   effect, sequence, hierarchy, comparison, network, or evidence board.
 - `visual_focus`: the dominant visual system or focus region the eye should
@@ -87,8 +90,10 @@ For every content slide define:
   image.
 
 Except for cover, chapter, and closing pages, avoid topic-only titles such as
-"平台架构" or "项目成效". Prefer conclusions such as "统一知识底座是规模化复制
-的前提". The title should state what is true; the visual should show why.
+"平台架構" or "專案成效". Prefer conclusions such as "提前36小時識別風險，減少
+被動處置". Write executive prose in Traditional Chinese while preserving
+source-approved technical terms such as `AI`, `KPI`, `FDE`, and `SCADA` in
+English. The title should state what is true; the visual should show why.
 
 Do not confuse thesis alignment with thesis repetition. A problem page can
 support a future platform recommendation by making fragmentation, delay, or
@@ -113,8 +118,8 @@ content. Visual objects carry claims just as text does.
   unrelated capability summary.
 
 Use short spoken bridges. A good bridge names the conclusion just established
-and the next question, for example: "价值方向已经明确，下一步要回答的是这套能力
-如何落到现有流程中。"
+and the next question, for example: "價值方向已經明確，下一步要回答的是這套能力
+如何落到現有流程中。"
 
 ## 5. Run The Solution-Expert Review
 
@@ -160,5 +165,9 @@ Review the complete storyboard before any paid image generation.
 - Does the contact sheet show a deliberate rhythm: establish -> explain -> prove
   -> decide?
 - Are adjacent pages visibly related without repeating the same template?
+- Can a senior leader recover the conclusion and main relationship from the
+  title plus visual within a few seconds, without unusually skilled narration?
+- Do KPI and outcome pages visibly prioritize baseline, target, actual result,
+  and time period?
 
 Record any failed test in the plan and revise the storyboard before generation.
