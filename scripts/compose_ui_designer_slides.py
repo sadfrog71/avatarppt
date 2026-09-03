@@ -13,14 +13,21 @@ from deck_utils import (
     image_rendered_text,
     iter_slides,
     load_plan,
+    prefer_editable_text,
     resolve_path,
     resolved_title_render_mode,
+    typography_policy,
 )
 from validate_plan import validate_plan
 
 
 CANVAS = (1280, 720)
 DEFAULT_OUTPUT_SIZE = (1920, 1080)
+POINT_TO_PIXEL = 96 / 72
+
+
+def pt_to_px(value: float) -> int:
+    return math.ceil(value * POINT_TO_PIXEL)
 
 
 def hex_rgb(value: str) -> tuple[int, int, int]:
@@ -113,6 +120,10 @@ class UIComposer:
         self.slide = slide
         self.display = slide.get("designer", {})
         self.generation = plan.get("image_generation", {})
+        self.typography = typography_policy(plan)
+        self.minimum_font_size = pt_to_px(self.typography["minimum_font_size_pt"])
+        self.body_font_size = pt_to_px(self.typography["body_font_size_pt"])
+        self.title_font_size = pt_to_px(self.typography["title_font_size_pt"])
         self.title_render_mode = resolved_title_render_mode(plan, slide)
         self.image_text = image_rendered_text(plan, slide)
         self.palette = plan["palette"]
@@ -151,15 +162,19 @@ class UIComposer:
         self.draw.rounded_rectangle((x0 + 2, y0 + 6, x1 + 2, y1 + 6), radius=radius, fill=(0, 44, 90, 14))
         self.rounded(box, radius, (255, 255, 255, actual_alpha), (*self.primary, 58), 1)
 
-    def draw_text_box(self, text: str, xy: tuple[int, int], width: int, size: int, *, bold: bool = False, fill: tuple[int, int, int] | None = None, line_gap: float = 1.28, max_lines: int | None = None) -> int:
-        font = self.font(size, bold)
+    def draw_text_box(self, text: str, xy: tuple[int, int], width: int, size: int, *, bold: bool = False, fill: tuple[int, int, int] | None = None, line_gap: float = 1.28, max_lines: int | None = None, caption: bool = False) -> int:
+        effective_size = max(
+            size,
+            self.minimum_font_size if caption else self.body_font_size,
+        )
+        font = self.font(effective_size, bold)
         lines = wrap_text(self.draw, text, font, width)
         if max_lines is not None:
             lines = lines[:max_lines]
         x, y = xy
         for line in lines:
             self.draw.text((x, y), line, font=font, fill=(*(fill or self.text), 255))
-            y += math.ceil(size * line_gap)
+            y += math.ceil(effective_size * line_gap)
         return y
 
     def draw_readability_veil(self, box: tuple[int, int, int, int], alpha: int = 42) -> None:
@@ -197,16 +212,16 @@ class UIComposer:
         )
         self.draw.rounded_rectangle((48, 34, 180, 40), radius=3, fill=(*self.accent, 255))
         if title:
-            self.draw_text_box(title, (48, 48), 850, 32, bold=True, fill=self.secondary, max_lines=1)
+            self.draw_text_box(title, (48, 48), 850, self.title_font_size, bold=True, fill=self.secondary, max_lines=1)
         if statement:
-            self.draw_text_box(statement, (48, 86), 980, 15, fill=self.muted, max_lines=1)
+            self.draw_text_box(statement, (48, 86), 980, 15, fill=self.muted, max_lines=1, caption=True)
 
     def chip(self, text: str, box: tuple[int, int, int, int], *, fill: tuple[int, int, int] | None = None, dark: bool = False) -> None:
         color = fill or self.primary
         bg = (*color, 232 if dark else 28)
         fg = (255, 255, 255) if dark else self.secondary
         self.rounded(box, 999, bg, (*color, 140), 1)
-        font = self.font(17, True)
+        font = self.font(self.minimum_font_size, True)
         x0, y0, x1, y1 = box
         tw = text_width(self.draw, text, font)
         self.draw.text((x0 + max(14, (x1 - x0 - tw) // 2), y0 + (y1 - y0 - 20) // 2), text, font=font, fill=(*fg, 255))
@@ -217,7 +232,7 @@ class UIComposer:
         color = self.accent if accent else self.primary
         self.draw.rounded_rectangle((x0, y0, x0 + 8, y1), radius=4, fill=(*color, 255))
         self.draw_text_box(value, (x0 + 24, y0 + 22), x1 - x0 - 42, 34, bold=True, fill=color, max_lines=1)
-        self.draw_text_box(label, (x0 + 26, y0 + 64), x1 - x0 - 50, 15, fill=self.muted, max_lines=2)
+        self.draw_text_box(label, (x0 + 26, y0 + 64), x1 - x0 - 50, 15, fill=self.muted, max_lines=2, caption=True)
 
     def render_opener(self) -> None:
         metrics = self.display.get("metrics", [])
@@ -241,7 +256,7 @@ class UIComposer:
             self.card(box, alpha=92, radius=20)
             x0, y0, x1, _ = box
             self.draw_text_box(data.get("title", ""), (x0 + 24, y0 + 28), 270, 22, bold=True, fill=color, max_lines=1)
-            self.draw_text_box(data.get("subtitle", ""), (x0 + 24, y0 + 62), 266, 14, fill=self.muted, max_lines=1)
+            self.draw_text_box(data.get("subtitle", ""), (x0 + 24, y0 + 62), 266, 14, fill=self.muted, max_lines=1, caption=True)
             y = y0 + 112
             for item in data.get("items", [])[:4]:
                 self.draw.ellipse((x0 + 28, y + 8, x0 + 38, y + 18), fill=(*color, 255))
@@ -323,7 +338,7 @@ class UIComposer:
             self.draw_text_box(str(index + 1), (x + 35, y - 21), 50, 30, bold=True, fill=(255, 255, 255), max_lines=1)
             self.card((x - 22, y + 76, x + 150, y + 220), alpha=108, radius=16)
             self.draw_text_box(step.get("title", ""), (x - 4, y + 98), 136, 18, bold=True, fill=self.secondary, max_lines=2)
-            self.draw_text_box(step.get("desc", ""), (x - 4, y + 150), 136, 15, fill=self.muted, max_lines=3)
+            self.draw_text_box(step.get("desc", ""), (x - 4, y + 150), 136, 15, fill=self.muted, max_lines=3, caption=True)
         for index, item in enumerate(self.display.get("metrics", [])[:3]):
             self.kpi(item["value"], item["label"], (82 + index * 380, 555, 410 + index * 380, 656), accent=index == 0)
 
@@ -382,6 +397,12 @@ def main() -> None:
     errors = validate_plan(plan)
     if errors:
         raise SystemExit("\n".join(f"ERROR: {error}" for error in errors))
+    if prefer_editable_text(plan):
+        raise SystemExit(
+            "typography.prefer_editable_text=true: do not rasterize slide copy with "
+            "compose_ui_designer_slides.py; keep the generated canvas text-free and "
+            "let assemble_deck.py add slide.editable_text as native PowerPoint text."
+        )
     generation = plan["image_generation"]
     source_directory = generation.get("source_directory")
     if not source_directory:

@@ -1,4 +1,4 @@
 interface:
   display_name: "Image Avatar PPT"
-  short_description: "生成繁體結論標題、證據清晰、視覺完整的管理層圖片 PPT"
-  default_prompt: "Use $imageavatarppt to turn my outline into a Traditional-Chinese executive PPT with editable conclusion-led titles, traceable baseline-target-actual evidence, semantic visual anchors, low speaker dependency, and anti-template QA."
+  short_description: "生成繁體結論標題、可編輯正文與克制圖像的管理層 PPT"
+  default_prompt: "Use $imageavatarppt to turn my outline into a Traditional-Chinese executive PPT with native editable titles and body copy, an 18pt hard font floor, regular text at 20pt or larger, non-text raster/image expression within 30%, traceable baseline-target-actual evidence, semantic visual anchors, low speaker dependency, and anti-template QA."

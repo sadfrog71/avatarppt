@@ -1,6 +1,6 @@
 ---
 name: imageavatarppt
-description: Generate thesis-led, chapter-based executive PowerPoint decks from Chinese or English outlines using the bundled Parallel Digital template, source-aware editorial layouts, restrained palette-controlled full-slide images, explicit page-to-page transitions, static anti-template audits, and optional multimodal visual QA. Use when Codex must turn loose material into a management, executive, proposal, strategy, steering-committee, or major-project deck; identify the central judgment and decision request; reduce formulaic AI copy and generic AI visual devices; generate 16:9 content images with OpenAI GPT Image or MiniMax; review images and deck rhythm with Kimi Vision; recolor the template; and assemble a final PPTX.
+description: Generate thesis-led, chapter-based executive PowerPoint decks from Chinese or English outlines using the bundled Parallel Digital template, source-aware editorial layouts, native editable titles and body copy, an 18pt hard font floor with regular copy at 20pt or larger, non-text raster/image expression capped at 30%, explicit page-to-page transitions, static anti-template and assembled-PPTX audits, and optional multimodal visual QA. Use when Codex must turn loose material into a management, executive, proposal, strategy, steering-committee, or major-project deck; identify the central judgment and decision request; reduce formulaic AI copy and generic AI visual devices; use OpenAI GPT Image or MiniMax as restrained visual support; review images and deck rhythm with Kimi Vision; recolor the template; and assemble a final editable PPTX.
 ---
 
 # Image Avatar PPT
@@ -56,6 +56,13 @@ planning and QA requirements, not optional style suggestions.
   change, the industry-specific judgment, or the intended management outcome to
   tiny annotations. An annotation may explain a point; it may not replace the
   point. Write “提前36小時識別風險，減少被動處置”, not “專案成效”.
+- **Typography and editability:** Use PowerPoint-native text for titles, body
+  copy, KPI values, labels, captions, and source notes by default. The hard
+  floor is `18pt`; regular body copy, labels that carry the argument, and KPI
+  explanations should normally be `20pt` or larger. Use `28pt` or larger for
+  content titles. Reserve `18pt` for true captions, short labels, and source
+  notes. If copy does not fit, shorten it, restructure the layout, or split the
+  page; never solve overflow by shrinking below these floors.
 - **Text-to-visual balance:** For substantive content pages, visible text should
   normally occupy about 30%-45% of the usable content area, with 30% as the
   minimum target for an argument page. Use the remaining area for one dominant
@@ -73,11 +80,12 @@ planning and QA requirements, not optional style suggestions.
 - **Editorial authorship:** Preserve the solid, quiet canvas, but do not make
   every page a polished infographic. Prefer source screenshots, original
   charts, plain tables, annotated evidence, and native diagrams before generic
-  illustration. Default conceptual pages to one or two semantic graphic accents
-  covering roughly 15%-30% of the usable content area. A framework, process,
-  narrative concept, chart, or evidence object may occupy more because it carries
-  information. Icons, cards, hubs, arrows, or illustrations are not forbidden;
-  reject them when they are generic, dominant, or mechanically repeated.
+  illustration. Keep non-text raster illustration, photo, screenshot, or other image expression at
+  or below 30% of the usable content area. A framework, process, narrative
+  concept, chart, or evidence system may occupy more only when it is built as
+  editable native PowerPoint shapes, charts, connectors, and text. Icons,
+  cards, hubs, arrows, or illustrations are not forbidden; reject them when
+  they are generic, dominant, or mechanically repeated.
 - **Semantic load:** For every non-typographic page, declare one `semantic_visual_anchor` that carries meaning beyond text arrangement. A data pattern, source object, domain silhouette, framework, process, spatial system, or concept visual qualifies; boxes, thin rules, arrows, and empty containers alone do not. Narration may add context, but the title plus visual must already communicate the conclusion and relationship.
 - **Result evidence:** On KPI and outcome pages, foreground source-backed baseline, target, actual result, and time period. Preserve units and dates; record missing values as gaps instead of inventing them.
 - **Copy rhythm:** Vary title forms across facts, observations, decisions,
@@ -128,11 +136,13 @@ Deliver:
 - One generated PNG per content slide.
 - `contact-sheet.png` showing all content slides in order for deck-level review.
 - A static style-audit JSON covering title formulas, copy density, repeated
-  layout families, declared source material, graphic balance, and common
-  AI-default devices.
+  layout families, declared source material, image-area ratio, editable-text
+  coverage, font floors, graphic balance, and common AI-default devices.
 - `image-qa.json` when Kimi QA is enabled.
 - Final `.pptx`.
 - Slide inventory JSON generated by the assembler.
+- `pptx-audit.json` proving editable-copy coverage and font floors in the
+  assembled file.
 
 ## Workflow
 
@@ -195,11 +205,17 @@ Deliver:
 
 3. Create `deck-plan.json`.
    - Follow `references/deck-plan-schema.md`.
-   - For new plans, declare `authorship`, plus each slide's `visual_source`,
+   - For new plans, declare `authorship` and `typography`, plus each slide's `visual_source`,
      `source_asset_refs`, `layout_family`, `material_form`,
-     `semantic_visual_anchor`, `graphic_role`, `graphic_area_ratio`, and
-     `graphic_devices`. These fields improve static and visual QA; older plans
-     remain valid without them.
+     `semantic_visual_anchor`, `graphic_role`, `graphic_area_ratio`,
+     `image_area_ratio`, `editable_text`, and `graphic_devices`. These fields
+     improve static and visual QA; older plans remain valid without them.
+   - For new plans, set `typography.prefer_editable_text=true`,
+     `minimum_font_size_pt=18`, `body_font_size_pt=20`,
+     `title_font_size_pt>=28`, and `caption_font_size_pt=18`. Set
+     `image_generation.max_image_area_ratio=0.30`. Use `image_area_ratio` for
+     the non-text raster or generated-image-expression region; do not confuse it with
+     `graphic_area_ratio`, which may include editable native diagrams and charts.
    - Set `language.primary=zh-Hant` for Traditional Chinese output and list
      protected English terms in `language.preserve_terms`.
    - For new plans, default content slides to `title_render_mode=native`.
@@ -214,22 +230,18 @@ Deliver:
      Do not pass only the asset filename to a text-only generation call and let
      the model reconstruct a synthetic screenshot, chart, photo, or document.
    - Choose a page role for every content slide: `opener`, `overview`, `metrics`, `process`, `system`, `comparison`, `roadmap`, or `custom`.
-   - For image-based PPT requests where the user asks ImageGen / GPT Image /
-     Codex image generation to output the PPT pages themselves, prefer
-     `direct_imagegen_slide` as the default route. Do not downgrade to
-     text-free backgrounds plus local text overlay merely because the deck has
-     substantial content. Instead, restructure the story, split pages when
-     needed, and keep each slide's visible text to a designed set of readable
-     thesis lines, KPI figures, labels, and evidence points. Put surplus detail
-     into `speaker_notes`.
-   - When the user explicitly wants GPT Image / Codex image generation to make
-     the PPT page itself, or complains that text and background are not designed
-     as one whole, set `image_generation.composition_mode` to
-     `direct_imagegen_slide`. In this mode, use Codex's built-in `image_gen`
-     tool to generate each full 16:9 slide as one integrated bitmap: visual
-     metaphor, scene, diagrams, KPI figures, labels, and Chinese hierarchy are
-     conceived together in the prompt. Do not generate a text-free background
-     and do not run local overlay compositors for these content pages.
+   - Default to `composition_mode=designed_canvas` with
+     `local_text_overlay=true`. Ask ImageGen for a text-free 16:9 canvas whose
+     non-editable visual expression occupies no more than 30%; add the title,
+     body copy, KPI values, labels, captions, and source notes as native
+     PowerPoint text from `slide.editable_text`. Build diagrams, charts, tables,
+     and connectors natively whenever the information must remain editable.
+   - Use `direct_imagegen_slide` only when the user explicitly accepts
+     non-editable slide text and asks for the whole page to be rendered as one
+     integrated bitmap. Set `typography.prefer_editable_text=false` in that
+     exceptional route. It is incompatible with the default editable-text
+     contract and should not be selected merely because ImageGen participates
+     in the design.
    - In `direct_imagegen_slide`, plan each page as a complete visual argument:
      a main thesis, a visual structure that embodies that thesis, and a small
      number of supporting proof points. Use a pure solid-color canvas, white by
@@ -239,7 +251,10 @@ Deliver:
      center node, connected satellites, arrows, layers, or a controlled set of
      shapes when those elements encode real relationships. Background, scenery,
      and ornament must remain subordinate to the conclusion.
-   - Make `exact_text` the exclusive image-rendered-copy contract. Do not
+   - Make `exact_text` the exclusive visible-copy contract. When
+     `prefer_editable_text=true`, every item must map exactly to one
+     `editable_text[].text` item and must not be drawn by the image model. In
+     explicit bitmap mode, it becomes the image-rendered-copy contract. Do not
      duplicate a `native` title in `exact_text`, and do not promote
      `storyline.core_thesis`, `decision_request`, `transition`, speaker notes,
      or prompt instructions into visible text unless those words are also
@@ -247,38 +262,41 @@ Deliver:
    - Allow graphical richness that improves comprehension or completes the
      composition: connectors, nodes, containers, icons, domain silhouettes,
      compact illustrations, paths, and restrained color blocks. Use
-     `graphic_role=accent` by default with about 15%-30% graphic area. Use
+     `graphic_role=accent` by default with about 15%-30% graphic area. Keep
+     `image_area_ratio<=0.30` for every new page. Use
      `explanatory` or `evidence` when a framework, process, narrative concept,
-     chart, screenshot, or source object is the information-bearing centerpiece.
+     chart, screenshot, or source object is the information-bearing centerpiece;
+     if it needs more than 30% of the page, construct it with editable native
+     elements rather than expanding the bitmap region.
    - Add `result_evidence` to metrics pages with `baseline`, `target`, `actual`,
      and `time_period`; make supplied values visible in the title or `exact_text`.
    - Keep adjacent pages visually related when they explain the same system,
      but change composition when the reasoning changes.
-   - Use `image_generation.local_text_overlay = true` only when the user has
-     not asked ImageGen to design the PPT pages themselves and the deck must
-     preserve a large amount of exact editable text. In that route, set
-     `source_directory` to a separate folder. The provider then creates
-     text-free visual backgrounds while the local compositor preserves all
-     required copy exactly.
+   - Set `image_generation.local_text_overlay=true` for the default editable
+     route and set `source_directory` to a separate folder when provider output
+     and final slide canvases differ. Do not use the legacy raster text
+     compositors when `typography.prefer_editable_text=true`; the assembler
+     creates the native PowerPoint text directly from `slide.editable_text`.
    - When the user asks ImageGen to participate in the PPT design itself rather
      than provide illustrations, set `image_generation.composition_mode` to
      `designed_canvas`. Prompt the image model to create pure-white,
      text-free information-graphic canvases with title zones, blank content
-     regions, diagrams, flows, and visual hierarchy; the local compositor then
-     overlays exact Chinese text.
+     regions, restrained diagrams, flows, and visual hierarchy; the assembler
+     then overlays exact Chinese text as native editable PowerPoint objects.
    - When the user wants a high-design deck rather than content-dense pages,
      and has not asked for direct Codex image generation, set
      `image_generation.composition_mode` to `ui_designer`. Use GPT Image to
      generate restrained text-free information structures on a white solid
      canvas: comparisons, flows, KPI bands, architecture layers, and process
      paths. Then use
-     `scripts/compose_ui_designer_slides.py` at `1920x1080` or higher to
-     overlay only concise Chinese labels, decisions, and key metrics. In this
+     `scripts/compose_ui_designer_slides.py` only for legacy raster-copy plans.
+     For new editable plans, keep the generated canvas text-free and let
+     `assemble_deck.py` add concise Chinese labels, decisions, and key metrics. In this
      mode, keep the information structure visually dominant: do not add
      full-width opaque headers, large text panels, dense card stacks, or
      immersive background art. Do not preserve every outline sentence as
      visible bullet text in this mode.
-   - Without local text overlay, reduce image-rendered copy to concise labels
+   - Without editable text, reduce image-rendered copy to concise labels
      and proof points. Keep the title native by default. Put long explanations
      in speaker notes or a separate editable-text workflow.
    - Write `exact_text` as an array so QA can compare expected strings.
@@ -364,8 +382,11 @@ with a complete prompt containing:
 - declared visual source, source-asset references, layout family, and only the
   graphical devices that the page actually needs;
 - `graphic_role` and `graphic_area_ratio`: keep accent graphics near 15%-30%;
-  allow information-bearing framework, process, concept, chart, and evidence
-  visuals to exceed that range when they remain the clearest explanation;
+  keep the whole non-text raster/image-expression region within
+  `image_area_ratio<=0.30`. Information-bearing framework, process, concept,
+  chart, and evidence systems must remain compact in this bitmap route. If they
+  need more area, switch back to the editable route and render the larger
+  system as native PowerPoint elements;
 - `material_form`, `semantic_visual_anchor`, language policy, and any supplied
   baseline, target, actual result, and time period;
 - the actual referenced source images when the page uses `source_evidence` or
@@ -395,14 +416,24 @@ python3 scripts/generate_images.py deck-plan.json --confirm-paid-call
 
 Use `--overwrite` only when intentionally regenerating existing slide images. Use `--limit 1` for a first-slide style calibration when the user requests it.
 
-9. Compose exact local text when enabled.
+9. Preserve exact text as editable PowerPoint objects.
+
+For new plans with `typography.prefer_editable_text=true`, do not call either
+local raster text compositor. Define every visible body item in
+`slide.editable_text`; `assemble_deck.py` adds those items as native text boxes.
+The following command is only for a legacy plan that deliberately rasterizes
+copy and sets `prefer_editable_text=false`:
 
 ```bash
 python3 scripts/compose_slide_images.py deck-plan.json
 ```
 
 10. Inspect and review.
-   - Reject malformed Chinese, missing exact terms, duplicated labels, collisions, cropped content, unreadable small text, wrong palette, or wrong business meaning.
+   - Reject malformed Chinese, missing exact terms, duplicated labels,
+     collisions, cropped content, unreadable small text, wrong palette, or wrong
+     business meaning. Reject any visible text below 18pt, regular text below
+     20pt, a new slide without editable exact copy, or non-text image
+     expression above 30%.
    - Generate the ordered contact sheet:
 
 ```bash
@@ -448,12 +479,21 @@ python3 scripts/assemble_deck.py deck-plan.json
 
 The assembler preserves editable template structure, duplicates chapter
 dividers, inserts full-bleed content PNGs, adds editable native content titles
-by default for new plans, optionally recolors known template colors, and writes
-a slide inventory.
+and `slide.editable_text` by default for new plans, optionally recolors known
+template colors, and writes a slide inventory.
 
 12. Verify.
    - Confirm slide count and order against `deck-plan.json`.
    - Confirm every content slide contains exactly one full-bleed image.
+   - Run the assembled-file static audit and resolve every failure:
+
+```bash
+python3 scripts/audit_pptx.py deck-plan.json --output pptx-audit.json
+```
+
+   - The audit must confirm native editable coverage of `exact_text`, an 18pt
+     hard floor, a 20pt regular-text floor, one native conclusion title when
+     declared, and one full-slide bitmap per content page.
    - Render thumbnails when a renderer is available and inspect all slides.
    - Read the titles and `transition.to_next` fields aloud in order; confirm the
      explanation moves smoothly toward `decision_request`.
@@ -465,7 +505,8 @@ a slide inventory.
 - Use template slide 1 as cover, slide 2 as catalogue, slide 3 as the reusable chapter divider, and slide 5 as closing.
 - Keep chapter-page text editable.
 - Use content visuals as replaceable full-slide images; keep content titles as
-  editable native text by default.
+  editable native text by default. Keep all argument-bearing copy, KPI values,
+  labels, captions, and source notes editable in new plans.
 - Set `apply_palette_to_template` to `false` only when original corporate branding must remain unchanged.
 - Do not alter the original template asset.
 
@@ -475,6 +516,8 @@ Read `references/template-inventory.md` when changing template handling.
 
 - Stop if a required API key is missing; name the required environment variable.
 - Stop if a slide image is missing, non-PNG, not close to 16:9, or below the configured minimum dimensions.
+- Stop if a new plan declares font sizes below 18pt, regular text below 20pt,
+  omits editable exact copy, or sets `image_area_ratio` above 0.30.
 - Stop if the catalogue is enabled with more than four chapters.
 - Do not silently switch providers.
 - Do not assemble images that failed QA.

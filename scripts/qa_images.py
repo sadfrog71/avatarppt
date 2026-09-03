@@ -19,10 +19,13 @@ from deck_utils import (
     language_policy_description,
     load_plan,
     max_accent_graphic_area_ratio,
+    max_image_area_ratio,
     palette_description,
+    prefer_editable_text,
     resolve_path,
     resolved_graphic_area_ratio,
     resolved_graphic_role,
+    resolved_image_area_ratio,
     resolved_title_render_mode,
     result_evidence_items,
     validate_image_geometry,
@@ -67,6 +70,7 @@ def enforce_visual_balance_gate(
     review: dict[str, Any],
     graphic_role: str,
     max_accent_ratio: float = 0.30,
+    max_image_ratio: float = 0.30,
     semantic_anchor_required: bool = False,
     result_evidence_required: bool = False,
 ) -> dict[str, Any]:
@@ -103,6 +107,18 @@ def enforce_visual_balance_gate(
                 "estimated accent graphic area exceeds the configured budget "
                 f"({estimated_ratio:.2f} > {max_accent_ratio:.2f}, allowing 0.05 "
                 "visual-estimation tolerance)"
+            )
+    estimated_image_ratio = review.get("estimated_image_area_ratio")
+    if (
+        not isinstance(estimated_image_ratio, bool)
+        and isinstance(estimated_image_ratio, (int, float))
+        and estimated_image_ratio > max_image_ratio
+    ):
+        review["pass"] = False
+        if not any("estimated image area" in str(issue) for issue in issues):
+            issues.append(
+                "estimated image area exceeds the configured budget "
+                f"({estimated_image_ratio:.2f} > {max_image_ratio:.2f})"
             )
     for field in (
         "executive_glanceability",
@@ -220,13 +236,28 @@ def review_with_kimi(
     graphic_role = resolved_graphic_role(plan, slide)
     graphic_area_ratio = resolved_graphic_area_ratio(plan, slide)
     max_accent_ratio = max_accent_graphic_area_ratio(plan)
+    image_area_ratio = resolved_image_area_ratio(slide)
+    max_image_ratio = max_image_area_ratio(plan)
+    editable_preferred = prefer_editable_text(plan)
     semantic_visual_anchor = str(slide.get("semantic_visual_anchor") or "")
     material_form = str(slide.get("material_form") or "not declared")
     result_evidence = result_evidence_items(slide)
     semantic_anchor_required = graphic_role in {"accent", "explanatory", "evidence"}
-    result_evidence_required = bool(result_evidence)
+    result_evidence_required = bool(result_evidence) and not editable_preferred
     title_render_mode = resolved_title_render_mode(plan, slide)
-    expected_image_text = image_rendered_text(plan, slide)
+    expected_image_text = (
+        [] if editable_preferred else image_rendered_text(plan, slide)
+    )
+    copy_review_instruction = (
+        "This is a pre-assembly text-free canvas. Reject every visible word, letter, "
+        "number, label, placeholder, watermark, UI string, or pseudo-text. Do not "
+        "expect the native title, editable exact copy, or result-evidence labels until "
+        "the assembled PPTX is rendered and reviewed. "
+        if editable_preferred
+        else
+        "Check text corruption, missing or duplicated labels, overlap, clipping, "
+        "small unreadable text, and exact-copy exclusivity. "
+    )
     prompt = (
         "Review this generated PowerPoint slide. "
         f"Intended message: {slide['message']}. "
@@ -249,17 +280,21 @@ def review_with_kimi(
         f"Graphic role: {graphic_role}. "
         f"Planned graphic area ratio: {graphic_area_ratio}. "
         f"Maximum accent graphic area ratio: {max_accent_ratio}. "
+        f"Planned non-text raster/image area ratio: {image_area_ratio}. "
+        f"Maximum non-text raster/image area ratio: {max_image_ratio}. "
+        f"Editable text preferred: {editable_preferred}. "
         f"Title render mode: {title_render_mode}. "
         f"Expected image-rendered text: {json.dumps(expected_image_text, ensure_ascii=False)}. "
         "When title render mode is native, reject a title, title placeholder, or "
         "pseudo-title inside the bitmap; require a clean title zone for editable "
         "PowerPoint text. "
         f"Required palette: {palette_description(plan['palette'])}. "
-        "Check text corruption, missing or duplicated labels, overlap, clipping, "
-        "small unreadable text, palette mismatch, semantic mismatch, competing "
-        "visual focal points, decorative clutter, and a topology that flattens "
+        f"{copy_review_instruction}"
+        "Check palette mismatch, semantic mismatch, competing "
+        "visual focal points, decorative clutter, actual non-editable image-area "
+        "share, and a topology that flattens "
         "meaningful relationships into disconnected cards or table rows. The "
-        "visible copy must contain only the expected exact text; planning "
+        "Any visible copy must contain only the expected image-rendered text; planning "
         "labels, prompt instructions, deck-level thesis, decision request, "
         "transitions, and speaker notes must not leak into the image. Check "
         "every depicted object against the content boundary. When thesis "
@@ -270,10 +305,10 @@ def review_with_kimi(
         "understandable, and easy for an executive speaker to narrate. Reject a "
         "visually barren page made mostly of text, thin rules, and empty space when "
         "the declared graphic role calls for an accent, explanation, or evidence "
-        "object. For accent pages, prefer one or two semantic graphic accents and "
-        "keep them within the configured area limit. Frameworks, process diagrams, "
-        "concept diagrams, charts, and source evidence may exceed that limit because "
-        "they carry information. Also review authorship quality. Flag standard AI-default "
+        "object. Keep the entire non-text raster or generated-image expression "
+        "within the configured image-area limit. Larger frameworks, process diagrams, "
+        "concept diagrams, charts, and evidence systems must be reserved for editable "
+        "native PowerPoint elements. Also review authorship quality. Flag standard AI-default "
         "visual devices when they are not required by the content: repeated "
         "rounded-card grids, circular icon badges, symmetric hub-and-spoke "
         "layouts, glowing AI brains or chips, decorative arrows, generic fake "
@@ -312,6 +347,7 @@ def review_with_kimi(
         '"low|medium|high", "editorial_authorship": boolean, '
         '"graphic_balance": "too_sparse|balanced|too_dominant", '
         '"estimated_graphic_area_ratio": number from 0 to 1, '
+        '"estimated_image_area_ratio": number from 0 to 1, '
         '"semantic_graphics_present": boolean, '
         '"semantic_visual_anchor_match": boolean, '
         '"visual_semantic_load": "low|medium|high", '
@@ -346,6 +382,7 @@ def review_with_kimi(
             parse_json_content(content),
             graphic_role,
             max_accent_ratio,
+            max_image_ratio,
             semantic_anchor_required,
             result_evidence_required,
         )
@@ -376,6 +413,7 @@ def review_deck_style_with_kimi(
             "visual_source": slide.get("visual_source", "not declared"),
             "graphic_role": resolved_graphic_role(plan, slide),
             "graphic_area_ratio": resolved_graphic_area_ratio(plan, slide),
+            "image_area_ratio": resolved_image_area_ratio(slide),
             "material_form": slide.get("material_form", "not declared"),
             "semantic_visual_anchor": slide.get("semantic_visual_anchor", ""),
             "result_evidence": result_evidence_items(slide),
@@ -396,9 +434,10 @@ def review_deck_style_with_kimi(
         "an intentional rhythm. Check for visual completeness: the deck should not "
         "collapse into text blocks, thin rules, and large empty areas. Necessary "
         "framework, process, and narrative-concept pages may use ImageGen visuals as "
-        "the information-bearing centerpiece. Accent graphics should normally stay "
-        "within 30% of the usable content area, while information-bearing visuals may "
-        "be larger. Judge beauty, simplicity, glanceability, and narration support "
+        "a restrained semantic accent. Non-text raster or generated-image "
+        "expression must stay within 30% of the usable content area; larger "
+        "information-bearing systems should be editable native PowerPoint elements. "
+        "Judge beauty, simplicity, glanceability, and narration support "
         "from an executive audience's perspective. Do not fail "
         "a deck merely for consistent branding; fail it when consistency erases "
         "editorial selection or when generic visual devices substitute for content. "

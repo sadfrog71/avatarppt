@@ -60,6 +60,11 @@
       "id": 12,
       "prompt": "繁体中文为主，AI、KPI、FDE、SCADA等专业词保留英文。每页标题直接写结论，例如‘提前36小时识别风险，减少被动处置’，不要只写‘项目成效’。页面优先呈现基线、目标、实际结果和时间周期。",
       "expected_output": "The plan sets language.primary=zh-Hant and preserves protected technical abbreviations in English. Content titles remain editable native PowerPoint text but state a source-backed conclusion rather than a generic topic. Metrics pages declare result_evidence with baseline, target, actual, time_period, and source_ref; supplied values and units appear prominently in the title or exact_text, missing values are recorded as gaps rather than invented, and static plus visual QA reject topic-only titles or hidden result evidence."
+    },
+    {
+      "id": 13,
+      "prompt": "还是要优化下本地技能：字体至少18，常规要20以上，图片表达占比30%以内，文字尽量可编辑。",
+      "expected_output": "The skill defaults new plans to native editable PowerPoint text for titles, body copy, KPI values, labels, captions, and source notes. Validation enforces an 18pt hard minimum, at least 20pt for regular and argument-bearing text, and normally at least 28pt for content titles. Each slide declares image_area_ratio no greater than 0.30 for all non-editable bitmap or generated-image expression. Larger frameworks, charts, processes, or evidence systems use editable native PowerPoint elements. Static audit reports font-size, editable-text coverage, and image-area violations, and legacy raster compositors refuse editable-text plans."
     }
   ]
 }

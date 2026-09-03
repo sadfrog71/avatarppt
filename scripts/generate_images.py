@@ -21,10 +21,13 @@ from deck_utils import (
     language_policy_description,
     load_plan,
     max_accent_graphic_area_ratio,
+    max_image_area_ratio,
     palette_description,
+    prefer_editable_text,
     resolve_path,
     resolved_graphic_area_ratio,
     resolved_graphic_role,
+    resolved_image_area_ratio,
     resolved_title_render_mode,
     result_evidence_items,
 )
@@ -50,6 +53,10 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
     graphic_area_ratio = resolved_graphic_area_ratio(plan, slide)
     max_accent_ratio = max_accent_graphic_area_ratio(plan)
     max_accent_percent = round(max_accent_ratio * 100)
+    planned_image_ratio = resolved_image_area_ratio(slide) or 0.0
+    max_image_ratio = max_image_area_ratio(plan)
+    planned_image_percent = round(planned_image_ratio * 100)
+    max_image_percent = round(max_image_ratio * 100)
     language_instruction = language_policy_description(plan)
     material_form = str(slide.get("material_form") or "not declared")
     semantic_visual_anchor = str(
@@ -80,8 +87,10 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
     elif graphic_role in {"explanatory", "evidence"}:
         graphic_instruction = (
             "The chart, framework, process, concept diagram, screenshot, or evidence "
-            "object is information-bearing and may occupy more than the accent cap. "
-            f"Keep any secondary decorative graphics within {max_accent_percent}%. "
+            "object is information-bearing. Keep its non-text raster portion within "
+            "the image-area cap; reserve any larger system for editable native "
+            "PowerPoint shapes, charts, connectors, and text. "
+            f"Keep secondary decorative graphics within {max_accent_percent}%. "
         )
     elif graphic_role == "none":
         graphic_instruction = (
@@ -93,6 +102,12 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
             "Use meaningful graphic accents when they improve scanning or explanation. "
             "Do not interpret anti-template constraints as a ban on graphics. "
         )
+    image_instruction = (
+        f"Planned non-text raster/image expression area: {planned_image_percent}%. "
+        f"Keep non-text raster or generated-image expression within {max_image_percent}% of "
+        "the usable content area. Prefer editable native PowerPoint text, shapes, "
+        "charts, and diagrams for the remaining explanation. "
+    )
     title_render_mode = resolved_title_render_mode(plan, slide)
     if title_render_mode == "native":
         title_instruction = (
@@ -115,7 +130,7 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
         "negative_prompt",
         "no watermark, no logo, no duplicated text, no cropped text",
     )
-    if generation.get("local_text_overlay"):
+    if generation.get("local_text_overlay") or prefer_editable_text(plan):
         text_constraint = (
             "Do not render any words, letters, numbers, logos, captions, labels, "
             "watermarks, UI text, or pseudo-text. Leave calm negative space for a "
@@ -144,9 +159,14 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
             "outcome, or decision. Use only the page-specific evidence and "
             "permitted non-literal visual subtext. "
         )
+    asset_request = (
+        "Create one text-free 16:9 presentation visual canvas, not a finished text slide. "
+        if prefer_editable_text(plan)
+        else "Create one complete 16:9 presentation slide image. "
+    )
     structured_prompt = (
-        "Create one complete 16:9 presentation slide image. "
-        f"Audience: {plan.get('audience', 'executive audience')}. "
+        asset_request
+        + f"Audience: {plan.get('audience', 'executive audience')}. "
         f"Objective: {plan.get('objective', '')}. "
         f"Slide role: {slide['layout_type']}. "
         f"Narrative role: {slide['narrative_role']}. "
@@ -169,7 +189,7 @@ def build_prompt(plan: dict[str, Any], slide: dict[str, Any]) -> str:
         "be visibly recognizable and carry at least one layer of meaning before "
         "the labels are read; text boxes, thin rules, arrows, or empty containers "
         "alone do not satisfy it. "
-        f"Graphic role: {graphic_role}. {graphic_instruction}"
+        f"Graphic role: {graphic_role}. {graphic_instruction}{image_instruction}"
         f"Title render mode: {title_render_mode}. {title_instruction}"
         f"{provenance_instruction}"
         f"Non-visible transition cue for composition only: "

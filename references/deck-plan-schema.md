@@ -70,6 +70,14 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
     "allowed_formulaic_titles": [],
     "allowed_cliche_terms": []
   },
+  "typography": {
+    "font_name": "Microsoft YaHei",
+    "minimum_font_size_pt": 18,
+    "body_font_size_pt": 20,
+    "title_font_size_pt": 28,
+    "caption_font_size_pt": 18,
+    "prefer_editable_text": true
+  },
   "palette": {
     "name": "青綠科技",
     "primary": "#0B6E69",
@@ -84,10 +92,13 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
     "model": "gpt-image-2",
     "size": "2048x1152",
     "quality": "high",
-    "composition_mode": "direct_imagegen_slide",
+    "composition_mode": "designed_canvas",
+    "local_text_overlay": true,
+    "source_directory": "generated-backgrounds",
     "background_mode": "solid",
     "allow_nonwhite_background": false,
     "max_accent_graphic_area_ratio": 0.30,
+    "max_image_area_ratio": 0.30,
     "style": "clean executive technology presentation",
     "negative_prompt": "no watermark, no logo, no duplicated text, no cropped text, no gradient background, no photo background, no texture, no pattern, no excessive glow, no scenic wallpaper, no disconnected card collection, no excessive ornament"
   },
@@ -124,24 +135,79 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
       "layout_type": "metrics",
       "title_render_mode": "native",
       "information_topology": "comparison",
-      "visual_source": "native_chart",
+      "visual_source": "generated_visual",
       "source_asset_refs": [
         "source/risk-warning-metrics.xlsx"
       ],
       "layout_family": "evidence_comparison",
       "material_form": "data_visual",
       "graphic_role": "evidence",
-      "graphic_area_ratio": 0.55,
+      "graphic_area_ratio": 0.25,
+      "image_area_ratio": 0.25,
       "semantic_visual_anchor": "基線、目標與實際提前量的三段對比圖",
       "graphic_devices": [
-        "native baseline-target-actual chart",
-        "source note"
+        "compact text-free baseline-target-actual bar comparison",
+        "native editable source note"
       ],
       "exact_text": [
         "基線：平均提前6小時",
         "目標：提前24小時",
         "實際：提前36小時",
         "週期：2026年1—6月"
+      ],
+      "editable_text": [
+        {
+          "text": "基線：平均提前6小時",
+          "role": "metric",
+          "x": 0.08,
+          "y": 0.30,
+          "width": 0.38,
+          "height": 0.12,
+          "font_size_pt": 24,
+          "bold": true,
+          "color": "primary",
+          "alignment": "left",
+          "vertical_alignment": "middle"
+        },
+        {
+          "text": "目標：提前24小時",
+          "role": "metric",
+          "x": 0.08,
+          "y": 0.44,
+          "width": 0.38,
+          "height": 0.12,
+          "font_size_pt": 24,
+          "bold": true,
+          "color": "secondary",
+          "alignment": "left",
+          "vertical_alignment": "middle"
+        },
+        {
+          "text": "實際：提前36小時",
+          "role": "metric",
+          "x": 0.08,
+          "y": 0.58,
+          "width": 0.38,
+          "height": 0.12,
+          "font_size_pt": 28,
+          "bold": true,
+          "color": "accent",
+          "alignment": "left",
+          "vertical_alignment": "middle"
+        },
+        {
+          "text": "週期：2026年1—6月",
+          "role": "caption",
+          "x": 0.08,
+          "y": 0.73,
+          "width": 0.38,
+          "height": 0.08,
+          "font_size_pt": 18,
+          "bold": false,
+          "color": "muted",
+          "alignment": "left",
+          "vertical_alignment": "middle"
+        }
       ],
       "result_evidence": {
         "baseline": "平均提前6小時",
@@ -192,8 +258,18 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
   Traditional Chinese while preserving exact English abbreviations in
   `language.preserve_terms`, including `AI`, `KPI`, `FDE`, and `SCADA` unless
   the source requires another policy.
+- For new plans, set `typography.prefer_editable_text=true`. The hard minimum
+  is `minimum_font_size_pt=18`; regular body copy and argument-bearing labels
+  use `body_font_size_pt>=20`; content titles normally use
+  `title_font_size_pt>=28`; true captions and source notes may use
+  `caption_font_size_pt=18`. If text does not fit, shorten, restructure, or
+  split the page instead of shrinking below the floor.
 - Set `image_generation.max_accent_graphic_area_ratio` to a value greater than
   0 and no greater than 0.30. The default is 0.30.
+- Set `image_generation.max_image_area_ratio` to a value greater than 0 and no
+  greater than 0.30. Every new slide must declare `image_area_ratio` at or below
+  that value. This measures non-text raster illustration, photo, screenshot, or generated-image
+  expression, not native PowerPoint shapes, charts, connectors, or text.
 - Keep `exact_text` concise and designed for the page. Short labels should
   normally be under 18 Chinese characters, but thesis lines, KPI captions, and
   evidence points may be longer when they are necessary for the slide to carry
@@ -239,7 +315,9 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
   or intentional `none`, and estimate `graphic_area_ratio` from 0 to 1. Default
   conceptual pages to `accent` at roughly 0.15-0.30. Frameworks, processes,
   narrative concepts, charts, screenshots, and source objects may use
-  `explanatory` or `evidence` and exceed 0.30 because they carry information.
+  `explanatory` or `evidence`; if the system needs to exceed 0.30, build the
+  larger portion as editable native PowerPoint elements while keeping
+  `image_area_ratio<=0.30`.
   Declare `material_form` as `typography`, `source_evidence`, `data_visual`,
   `diagram`, `illustration`, `table`, or `mixed`. For every non-typographic
   graphic role, write one `semantic_visual_anchor`: the non-text object, data
@@ -259,7 +337,11 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
   `actual`, and `time_period`; use `null` only to record a genuine source gap.
   Put supplied values in the title or `exact_text`, keep units and dates exact,
   and record `source_ref`. Never invent a missing baseline or result.
-- Treat `exact_text` as the exclusive visible-copy contract. Do not render
+- Treat `exact_text` as the exclusive visible-copy contract. When
+  `typography.prefer_editable_text=true`, every item must appear exactly once in
+  `slide.editable_text`, and the image prompt must render no text. Each editable
+  item declares normalized `x`, `y`, `width`, `height`, `font_size_pt`, `role`,
+  `bold`, `color`, `alignment`, and `vertical_alignment`. Do not render
   `core_thesis`, `decision_request`, planning field names, transitions, or
   speaker notes unless the intended words are also present in `exact_text`.
 - New plans default to `title_render_mode=native`: do not include the title in
@@ -282,9 +364,14 @@ Use one JSON file as the source of truth for planning, generation, QA, and assem
 - Leave `prompt` empty only when `generate_images.py` should compose it from the structured fields.
 - Keep at most four sections when `include_catalogue` is true.
 - Use PNG output paths.
-- Use `image_generation.composition_mode = "direct_imagegen_slide"` when Codex
+- Default new editable plans to `image_generation.composition_mode =
+  "designed_canvas"` with `local_text_overlay=true`. The generated canvas is
+  text-free and the assembler adds `slide.editable_text` as native PowerPoint
+  text; do not run the legacy raster text compositors.
+- Use `image_generation.composition_mode = "direct_imagegen_slide"` only when
+  the user explicitly accepts non-editable text and Codex
   should call built-in `image_gen` to design each whole slide as one integrated
-  page. In that mode, do not set `local_text_overlay` and do not ask the
+  page. Set `typography.prefer_editable_text=false`. In that mode, do not set `local_text_overlay` and do not ask the
   provider to create a text-free background. The prompt must bind Chinese text,
   diagrams, KPI figures, scene, and information hierarchy into one visual
   argument, and should avoid repeated template-like compositions across the

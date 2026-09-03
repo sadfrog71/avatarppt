@@ -126,8 +126,11 @@ human-authored; it may simply be visually unfinished.
   usable content area; never exceed the configured 30% accent limit.
 - Use `graphic_role=explanatory` when a framework, process, architecture, or
   narrative concept is the clearest explanation. Use `graphic_role=evidence`
-  for charts, screenshots, photos, maps, tables, or documentary objects. These
-  information-bearing visuals may exceed 30%; secondary decoration may not.
+  for charts, screenshots, photos, maps, tables, or documentary objects. Keep
+  the total non-text raster illustration, photo, screenshot, or generated-image region within
+  `image_area_ratio<=0.30`. An information-bearing system may occupy more than
+  30% only when it is built with editable native PowerPoint shapes, charts,
+  connectors, and text.
 - Use `graphic_role=none` only for an intentional typographic pause. Preserve
   visual completeness through scale, alignment, spacing, and one clear path.
 - Judge cards, icons, arrows, hubs, and illustrations in context. One relevant
@@ -160,10 +163,11 @@ timing; it is not a default headline, center label, hero object, or diagram.
 - When `thesis_expression` is `explicit`, reveal the thesis only if the page is
   the intended strategic-judgment, solution, or decision moment and the words
   belong in `exact_text`.
-- Keep `exact_text` exclusive to image-rendered copy. Do not duplicate a native
-  title in it, and do not render prompt labels, deck-planning fields, speaker
-  notes, transition copy, or the decision request unless they appear in
-  `exact_text`.
+- Keep `exact_text` exclusive to intended visible copy. In the default editable
+  route, map every item exactly to `editable_text[].text` and forbid the image
+  model from drawing it. In an explicitly approved bitmap route, `exact_text`
+  becomes the image-rendered-copy contract. Do not duplicate a native title or
+  leak planning fields, speaker notes, transition copy, or the decision request.
 
 Example: if a diagnosis page lists five structural bottlenecks and the later
 deck answer is an enterprise agent platform, show the five bottlenecks as one
@@ -214,15 +218,25 @@ Create lighter and darker tints from these colors only when needed for hierarchy
 ## Typography
 
 - Use bold Chinese sans-serif for titles: Microsoft YaHei, Source Han Sans, Alibaba PuHuiTi, or equivalent.
-- Keep content titles editable and native by default; image models render them
-  only in explicitly declared `image` mode.
+- Keep titles, body copy, KPI values, labels, captions, and source notes
+  editable and native by default; image models render them only in an
+  explicitly approved bitmap mode.
+- Use `18pt` as the hard minimum. Use `20pt` or larger for regular body copy,
+  argument-bearing labels, and KPI explanations; use `28pt` or larger for
+  content titles. Reserve `18pt` for true captions, short labels, and source
+  notes. Never reduce the font below these floors to make a dense page fit;
+  shorten, restructure, or split the page instead.
 - Write prose in Traditional Chinese by default while preserving `AI`, `KPI`,
   `FDE`, `SCADA`, and other source-approved technical abbreviations in English.
 - Use the palette `text` color for main titles and main metrics.
 - Use the palette `muted` color for body text.
 - Use huge bold numbers for metrics when the slide has KPIs or quantitative outcomes.
-- Keep Chinese text short and high-level in image-model prompts. Prefer concise labels, 2-6 word card titles, and one-line support text.
-- Generated Chinese text must be inspected after image generation. Regenerate the image if key terms are wrong, repeated, malformed, overlapped, cropped, or too small.
+- In editable mode, keep image prompts text-free and place exact Traditional
+  Chinese copy in `editable_text`. In bitmap mode, keep Chinese text short and
+  high-level in image-model prompts.
+- Any explicitly bitmap-rendered Chinese text must be inspected after image
+  generation. Regenerate if key terms are wrong, repeated, malformed,
+  overlapped, cropped, or too small.
 - Vary title forms across the deck. Use fact-led, observation-led, decision-led,
   or question titles according to the page role. Content-slide titles must state
   the conclusion; reserve topic-only labels for covers and chapter pages. Do not build the
@@ -380,7 +394,12 @@ Prompt variables:
   page is an intentional typographic pause.
 - `{graphic_role}`: `accent`, `explanatory`, `evidence`, or intentional `none`.
 - `{graphic_area_ratio}`: estimated share of usable content area. Keep `accent`
-  pages around 0.15-0.30; information-bearing visuals may be larger.
+  pages around 0.15-0.30; editable native information-bearing visuals may be larger.
+- `{image_area_ratio}`: estimated share of the usable content area occupied by
+  non-text raster illustration, photo, screenshot, or generated-image expression. Keep it at or below
+  0.30 on every new slide.
+- `{editable_text}`: native PowerPoint text objects with exact copy, role,
+  normalized position, font size in points, weight, color, and alignment.
 - `{material_form}`: typography, source evidence, data visual, diagram,
   illustration, table, or mixed.
 - `{semantic_visual_anchor}`: the non-text object or pattern that visibly carries
@@ -393,25 +412,24 @@ Prompt variables:
 Generic prompt pattern:
 
 ```text
-16:9 full-slide Chinese executive PowerPoint page for {domain}. Use {language_policy}. Narrative role: {narrative_role}. Audience question: {audience_question}. Page conclusion: {message}. Native conclusion title: {title}. Thesis expression: {thesis_expression}. Content boundary: {content_boundary}. Thesis connection: {thesis_connection}. Visual source: {visual_source}. Source asset references: {source_asset_refs}. Layout family: {layout_family}. Material form: {material_form}. Semantic visual anchor: {semantic_visual_anchor}; make it visibly carry one layer of meaning beyond text arrangement. Approved graphic devices: {graphic_devices}. Graphic role: {graphic_role}; graphic area ratio: {graphic_area_ratio}. For accent pages, use one or two semantic visual accents covering roughly 15%-30% of the usable content area. Frameworks, processes, narrative concepts, charts, and evidence visuals may be larger because they carry information. Prioritize supplied result evidence: {result_evidence}. Do not make the page text-only or line-only by default. Title render mode: {title_render_mode}; in native mode reserve a clean title zone and render no title, placeholder, or pseudo-text. Use a pure white solid background with no texture, pattern, background photo, or scenic wallpaper. Information topology: {information_topology}. Visual reasoning: {visual_reasoning}. Create one primary reading path: {visual_focus}. Judge the complete page for beauty, simplicity, executive glanceability, and low speaker dependency. Do not mechanically repeat generic line-icon rows, circular badges, rounded-card grids, glowing AI symbols, fake dashboards, or automatic hub-and-spoke composition. An individual relevant device is allowed. Exact palette {palette}, enterprise report style, generous whitespace, stable grid. Render only this exact concise Chinese text: {exact_chinese_text}. Do not render planning labels, prompt instructions, or deferred solution content. No text overlap, no duplicated text, no cropped text, no malformed Chinese characters, no logos.
+16:9 full-slide Chinese executive PowerPoint visual canvas for {domain}. Use {language_policy}. Narrative role: {narrative_role}. Audience question: {audience_question}. Page conclusion: {message}. Native conclusion title: {title}. Thesis expression: {thesis_expression}. Content boundary: {content_boundary}. Thesis connection: {thesis_connection}. Visual source: {visual_source}. Source asset references: {source_asset_refs}. Layout family: {layout_family}. Material form: {material_form}. Semantic visual anchor: {semantic_visual_anchor}; make it visibly carry one layer of meaning beyond text arrangement. Approved graphic devices: {graphic_devices}. Graphic role: {graphic_role}; graphic area ratio: {graphic_area_ratio}; non-editable image area ratio: {image_area_ratio}, never above 0.30. If the information system needs more area, reserve it for editable native PowerPoint shapes, charts, connectors, and text. Prioritize supplied result evidence: {result_evidence}. Do not make the page text-only or line-only by default. Reserve clean regions for native editable text: {editable_text}. Render no title, body copy, KPI value, label, caption, source note, placeholder, or pseudo-text. Use a pure white solid background with no texture, pattern, background photo, or scenic wallpaper. Information topology: {information_topology}. Visual reasoning: {visual_reasoning}. Create one primary reading path: {visual_focus}. Judge the complete page for beauty, simplicity, executive glanceability, and low speaker dependency. Do not mechanically repeat generic line-icon rows, circular badges, rounded-card grids, glowing AI symbols, fake dashboards, or automatic hub-and-spoke composition. An individual relevant device is allowed. Exact palette {palette}, enterprise report style, generous whitespace, stable grid. Do not render planning labels, prompt instructions, or deferred solution content. No logos.
 ```
 
 If the generated result contains Chinese errors or collisions, tighten the copy and regenerate the image. Do not patch around major text defects by inserting the faulty image into the PPT.
 
 ### Direct Codex ImageGen Slide
 
-Use this route when the user wants the image model to design the whole PPT page,
-or when previous outputs looked like text placed on top of a background. In this
-route, prompt Codex's built-in `image_gen` tool to generate the complete
-full-slide page as one integrated bitmap.
+Use this exceptional route only when the user explicitly accepts non-editable
+text and wants the image model to design the whole PPT page. Set
+`typography.prefer_editable_text=false`. Otherwise, correct the hierarchy and
+native layout instead of rasterizing the copy. In this route, prompt Codex's
+built-in `image_gen` tool to generate the complete full-slide page as one
+integrated bitmap.
 
-This route is the preferred route for image-based PPT deliverables where the
-user asks ImageGen / GPT Image / Codex image generation to produce the slide
-pages themselves. Do not treat the image model as a background generator in this
-case. Text, diagrams, KPI figures, icons, visual metaphor, and hierarchy must be
+This route is not the default for new editable decks. When explicitly selected,
+text, diagrams, KPI figures, icons, visual metaphor, and hierarchy must be
 planned as one page. If the source has too much material, split the argument
-across more slides or move supporting detail into speaker notes rather than
-falling back to local overlay.
+across more slides or move supporting detail into speaker notes.
 
 Prompt pattern:
 
@@ -443,10 +461,10 @@ Material form: {material_form}.
 Non-text semantic visual anchor: {semantic_visual_anchor}. It must remain
 meaningful before labels are read; boxes, lines, and arrows alone are not enough.
 Graphic role: {graphic_role}. Planned graphic area ratio: {graphic_area_ratio}.
-For accent pages, keep one or two semantic graphic accents within 30% of the
-usable content area. For explanatory or evidence pages, let the framework,
-process, concept diagram, chart, screenshot, or source object become the visual
-centerpiece when that is the clearest way to understand the message.
+Planned image area ratio: {image_area_ratio}. Keep all non-text raster/image
+expression within 30% of the usable content area. A framework, process, concept
+diagram, chart, screenshot, or source object may still be the semantic
+centerpiece, but it must remain compact in this bitmap route.
 Result evidence: {result_evidence}. Foreground the supplied baseline, target,
 actual result, and time period with exact units and dates. Do not invent gaps.
 Language policy: {language_policy}.
@@ -523,9 +541,10 @@ no watermark, no logo, no generated stock-photo substitute, no cartoon, no dark 
   `KPI`, `FDE`, and `SCADA` remain in English.
 - Declared source assets remain recognizable and are not replaced by synthetic
   screenshots, dashboards, metrics, or documentary imagery.
-- Bitmap copy contains only `exact_text`; a native title appears only after
-  assembly, while planning labels and deck-level thesis text do not leak onto
-  implicit pages.
+- In editable mode, the bitmap contains no text and every `exact_text` item is
+  present as a native `editable_text` object. In explicit bitmap mode, bitmap
+  copy contains only `exact_text`. Planning labels and deck-level thesis text do
+  not leak onto implicit pages.
 - Every semantic object stays inside `content_boundary`; diagnosis and evidence
   pages do not prematurely depict the later solution or future state.
 - Palette matches the exact hex values in `deck-plan.json`.
@@ -539,10 +558,13 @@ no watermark, no logo, no generated stock-photo substitute, no cartoon, no dark 
 - Each page has one unmistakable dominant visual system.
 - Each non-typographic page has a recognizable semantic visual anchor; text
   boxes, thin rules, and arrows do not carry the page alone.
-- Accent pages contain enough semantic graphics to feel complete, normally
-  around 15%-30% of the usable content area, without letting decoration dominate.
-- Explanatory and evidence pages may devote more area to a framework, process,
-  narrative concept, chart, screenshot, or source object when it carries the argument.
+- Every page keeps non-text raster or generated-image expression at or below
+  30% of the usable content area.
+- Explanatory and evidence systems may devote more area to a framework, process,
+  narrative concept, chart, screenshot, or source object only when the larger
+  system is built with editable native PowerPoint elements.
+- No visible text is below 18pt; regular copy and argument-bearing labels are at
+  least 20pt; titles are normally at least 28pt.
 - A page may instead use one primary reading path carried by typography, a
   source artifact, a native chart, or a plain table; it is not forced into a
   diagram.

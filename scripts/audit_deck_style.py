@@ -14,9 +14,13 @@ from deck_utils import (
     iter_slides,
     load_plan,
     max_accent_graphic_area_ratio,
+    max_image_area_ratio,
+    prefer_editable_text,
     resolved_graphic_area_ratio,
     resolved_graphic_role,
+    resolved_image_area_ratio,
     resolved_title_render_mode,
+    typography_policy,
 )
 from validate_plan import validate_plan
 
@@ -149,9 +153,15 @@ def audit_plan(plan: dict[str, Any], strict: bool | None = None) -> dict[str, An
     topology_values: list[str] = []
     graphic_role_values: list[str] = []
     accent_graphic_ratios: list[float] = []
+    image_area_ratios: list[float] = []
+    editable_text_slide_count = 0
+    editable_font_sizes: list[float] = []
     material_form_values: list[str] = []
     topic_only_title_slides: list[str] = []
     max_accent_ratio = max_accent_graphic_area_ratio(plan)
+    max_image_ratio = max_image_area_ratio(plan)
+    typography = typography_policy(plan)
+    editable_preferred = prefer_editable_text(plan)
 
     allowed_titles = {
         item.strip()
@@ -236,6 +246,65 @@ def audit_plan(plan: dict[str, Any], strict: bool | None = None) -> dict[str, An
             finding["issues"].append(
                 f"planned visible copy has {visible_text_characters} characters; target is <= {max_characters}"
             )
+
+        image_area_ratio = resolved_image_area_ratio(slide)
+        finding["planned_image_area_ratio"] = image_area_ratio
+        if image_area_ratio is not None:
+            image_area_ratios.append(image_area_ratio)
+            if image_area_ratio > max_image_ratio:
+                finding["issues"].append(
+                    f"image area ratio {image_area_ratio:.2f} exceeds the configured "
+                    f"limit of {max_image_ratio:.2f}"
+                )
+        elif editable_preferred:
+            finding["issues"].append(
+                "editable-text mode requires an explicit image_area_ratio"
+            )
+
+        editable_text = slide.get("editable_text", [])
+        if not isinstance(editable_text, list):
+            editable_text = []
+        if editable_text:
+            editable_text_slide_count += 1
+        finding["editable_text_items"] = len(editable_text)
+        for item in editable_text:
+            if not isinstance(item, dict):
+                continue
+            size = item.get("font_size_pt")
+            if isinstance(size, bool) or not isinstance(size, (int, float)):
+                continue
+            numeric_size = float(size)
+            editable_font_sizes.append(numeric_size)
+            role = str(item.get("role", "body"))
+            required_size = (
+                typography["minimum_font_size_pt"]
+                if role in {"caption", "label", "note"}
+                else typography["body_font_size_pt"]
+            )
+            if numeric_size < required_size:
+                finding["issues"].append(
+                    f"editable text role={role} uses {numeric_size:g}pt; "
+                    f"required minimum is {required_size:g}pt"
+                )
+        if editable_preferred:
+            if not editable_text:
+                finding["issues"].append(
+                    "editable-text mode requires slide.editable_text"
+                )
+            else:
+                exact_values = [str(item) for item in exact_text]
+                editable_values = [
+                    str(item.get("text"))
+                    for item in editable_text
+                    if isinstance(item, dict) and isinstance(item.get("text"), str)
+                ]
+                missing_values = [
+                    value for value in exact_values if value not in editable_values
+                ]
+                if missing_values:
+                    finding["issues"].append(
+                        "editable text does not cover all exact_text items"
+                    )
 
         visible_copy = " ".join([title, *[str(item) for item in exact_text]])
         cliche_terms = [
@@ -565,6 +634,54 @@ def audit_plan(plan: dict[str, Any], strict: bool | None = None) -> dict[str, An
             }
         )
 
+    image_area_issue_ids = [
+        finding["id"]
+        for finding in slide_findings
+        if any(
+            "image area ratio" in issue or "image_area_ratio" in issue
+            for issue in finding["issues"]
+        )
+    ]
+    if image_area_issue_ids:
+        warnings.append(
+            {
+                "code": "image_area_contract",
+                "message": (
+                    "some slides omit the bitmap-image area declaration or exceed "
+                    "the configured 30% image-expression budget"
+                ),
+                "slides": image_area_issue_ids,
+            }
+        )
+
+    editable_text_issue_ids = [
+        finding["id"]
+        for finding in slide_findings
+        if any("editable-text mode" in issue or "editable text does not" in issue for issue in finding["issues"])
+    ]
+    if editable_text_issue_ids:
+        warnings.append(
+            {
+                "code": "editable_text_contract",
+                "message": "some slides still depend on rasterized copy instead of native editable text",
+                "slides": editable_text_issue_ids,
+            }
+        )
+
+    font_size_issue_ids = [
+        finding["id"]
+        for finding in slide_findings
+        if any("pt; required minimum" in issue for issue in finding["issues"])
+    ]
+    if font_size_issue_ids:
+        warnings.append(
+            {
+                "code": "font_size_contract",
+                "message": "some editable text is below the 18pt hard floor or 20pt regular-text floor",
+                "slides": font_size_issue_ids,
+            }
+        )
+
     semantic_anchor_issue_ids = [
         finding["id"]
         for finding in slide_findings
@@ -611,6 +728,9 @@ def audit_plan(plan: dict[str, Any], strict: bool | None = None) -> dict[str, An
         "weak_visual_provenance",
         "title_render_contract",
         "graphic_balance_contract",
+        "image_area_contract",
+        "editable_text_contract",
+        "font_size_contract",
         "topic_only_titles",
         "dominant_material_form_ratio",
         "typography_first_ratio",
@@ -648,6 +768,17 @@ def audit_plan(plan: dict[str, Any], strict: bool | None = None) -> dict[str, An
             "configured_max_accent_graphic_area_ratio": round(
                 max_accent_ratio, 4
             ),
+            "max_planned_image_area_ratio": round(
+                max(image_area_ratios, default=0.0), 4
+            ),
+            "configured_max_image_area_ratio": round(max_image_ratio, 4),
+            "editable_text_preferred": editable_preferred,
+            "editable_text_slide_count": editable_text_slide_count,
+            "minimum_planned_font_size_pt": (
+                round(min(editable_font_sizes), 2) if editable_font_sizes else None
+            ),
+            "configured_minimum_font_size_pt": typography["minimum_font_size_pt"],
+            "configured_body_font_size_pt": typography["body_font_size_pt"],
             "material_form_counts": dict(sorted(material_form_counts.items())),
             "dominant_material_form_ratio": round(
                 dominant_material_form_ratio, 4

@@ -12,13 +12,20 @@ from deck_utils import (
     image_rendered_text,
     iter_slides,
     load_plan,
+    prefer_editable_text,
     resolve_path,
     resolved_title_render_mode,
+    typography_policy,
 )
 from validate_plan import validate_plan
 
 
 CANVAS = (1280, 720)
+POINT_TO_PIXEL = 96 / 72
+
+
+def pt_to_px(value: float) -> int:
+    return math.ceil(value * POINT_TO_PIXEL)
 
 
 def hex_rgb(value: str) -> tuple[int, int, int]:
@@ -125,8 +132,10 @@ def fit_body_font(
     font_path: str,
     column_width: int,
     available_height: int,
+    minimum_size: int,
+    preferred_size: int,
 ) -> int:
-    for size in range(25, 14, -1):
+    for size in range(max(25, preferred_size), minimum_size - 1, -1):
         font = __import__("PIL.ImageFont", fromlist=["ImageFont"]).truetype(
             font_path, size
         )
@@ -140,7 +149,10 @@ def fit_body_font(
             group_heights.append(height)
         if max(group_heights, default=0) <= available_height:
             return size
-    return 15
+    raise ValueError(
+        f"visible copy does not fit at the required minimum body size of "
+        f"{minimum_size}px; split the slide or shorten the copy"
+    )
 
 
 def compose_slide(
@@ -152,6 +164,7 @@ def compose_slide(
     from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
     generation = plan.get("image_generation", {})
+    typography = typography_policy(plan)
     composition_mode = generation.get("composition_mode", "overlay_panels")
     designed_canvas = composition_mode == "designed_canvas"
     palette = plan["palette"]
@@ -199,9 +212,13 @@ def compose_slide(
         if title:
             items.remove(title)
             draw.rectangle((48, 126, 214, 132), fill=(*accent, 255))
-            title_size = 38
+            title_size = pt_to_px(typography["title_font_size_pt"])
             title_font = ImageFont.truetype(title_font_path, title_size)
-            while draw.textlength(title, font=title_font) > 1134 and title_size > 26:
+            minimum_title_size = pt_to_px(typography["body_font_size_pt"])
+            while (
+                draw.textlength(title, font=title_font) > 1134
+                and title_size > minimum_title_size
+            ):
                 title_size -= 1
                 title_font = ImageFont.truetype(title_font_path, title_size)
             draw.text((66, 58), title, font=title_font, fill=(*secondary, 255))
@@ -225,7 +242,13 @@ def compose_slide(
     column_width = (right - left - gutter * (columns - 1)) // columns
     groups = split_balanced(items, columns)
     body_size = fit_body_font(
-        draw, groups, body_font_path, column_width, bottom - top - 32
+        draw,
+        groups,
+        body_font_path,
+        column_width,
+        bottom - top - 32,
+        pt_to_px(typography["body_font_size_pt"]),
+        pt_to_px(typography["body_font_size_pt"]),
     )
     body_font = ImageFont.truetype(body_font_path, body_size)
     bold_font = ImageFont.truetype(bold_font_path, body_size)
@@ -283,6 +306,12 @@ def main() -> None:
     errors = validate_plan(plan)
     if errors:
         raise SystemExit("\n".join(f"ERROR: {error}" for error in errors))
+    if prefer_editable_text(plan):
+        raise SystemExit(
+            "typography.prefer_editable_text=true: do not rasterize copy with "
+            "compose_slide_images.py; keep the generated visual text-free and let "
+            "assemble_deck.py add slide.editable_text as native PowerPoint text"
+        )
     generation = plan["image_generation"]
     source_directory = generation.get("source_directory")
     if not source_directory:

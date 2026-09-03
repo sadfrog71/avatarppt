@@ -25,8 +25,10 @@ from pptx.util import Inches, Pt
 from deck_utils import (
     configured_minimum_size,
     load_plan,
+    prefer_editable_text,
     resolve_path,
     resolved_title_render_mode,
+    typography_policy,
     validate_image_geometry,
 )
 from validate_plan import validate_plan
@@ -122,13 +124,24 @@ def add_native_content_title(
     if not title:
         return
     palette = plan["palette"]
+    typography = typography_policy(plan)
     title_style = plan.get("native_title_style", {})
-    font_name = str(title_style.get("font_name", "Microsoft YaHei"))
-    font_size = float(title_style.get("font_size", 24))
+    font_name = str(title_style.get("font_name", typography["font_name"]))
+    font_size = float(
+        title_style.get("font_size", typography["title_font_size_pt"])
+    )
     if len(title) > 48:
-        font_size = min(font_size, 18)
+        font_size = max(
+            typography["minimum_font_size_pt"],
+            min(font_size, typography["body_font_size_pt"]),
+        )
     elif len(title) > 34:
-        font_size = min(font_size, 20)
+        font_size = max(
+            typography["body_font_size_pt"],
+            min(font_size, typography["body_font_size_pt"] + 2),
+        )
+    else:
+        font_size = max(font_size, typography["body_font_size_pt"])
 
     accent = slide.shapes.add_shape(
         MSO_SHAPE.RECTANGLE,
@@ -167,6 +180,84 @@ def add_native_content_title(
     run.font.size = Pt(font_size)
     run.font.bold = True
     run.font.color.rgb = RGBColor.from_string(palette["text"].lstrip("#"))
+
+
+def resolve_text_color(plan: dict[str, Any], value: Any) -> RGBColor:
+    palette = plan["palette"]
+    color = str(value or "text")
+    if color in palette:
+        color = palette[color]
+    if not HEX_IN_TEXT.fullmatch(color):
+        color = palette["text"]
+    return RGBColor.from_string(color.lstrip("#"))
+
+
+def add_editable_text_layer(
+    prs: Presentation,
+    slide: Any,
+    plan: dict[str, Any],
+    slide_plan: dict[str, Any],
+) -> int:
+    items = slide_plan.get("editable_text", [])
+    if not isinstance(items, list):
+        return 0
+    typography = typography_policy(plan)
+    alignment_map = {
+        "left": PP_ALIGN.LEFT,
+        "center": PP_ALIGN.CENTER,
+        "right": PP_ALIGN.RIGHT,
+    }
+    vertical_map = {
+        "top": MSO_ANCHOR.TOP,
+        "middle": MSO_ANCHOR.MIDDLE,
+        "bottom": MSO_ANCHOR.BOTTOM,
+    }
+    added = 0
+    for index, item in enumerate(items, start=1):
+        if not isinstance(item, dict):
+            continue
+        role = str(item.get("role", "body"))
+        default_size = (
+            typography["caption_font_size_pt"]
+            if role in {"caption", "label", "note"}
+            else typography["body_font_size_pt"]
+        )
+        font_size = max(
+            float(item.get("font_size_pt", default_size)),
+            typography["minimum_font_size_pt"],
+        )
+        if role not in {"caption", "label", "note"}:
+            font_size = max(font_size, typography["body_font_size_pt"])
+        box = slide.shapes.add_textbox(
+            int(prs.slide_width * float(item["x"])),
+            int(prs.slide_height * float(item["y"])),
+            int(prs.slide_width * float(item["width"])),
+            int(prs.slide_height * float(item["height"])),
+        )
+        box.name = f"Editable Text {index}: {role}"
+        frame = box.text_frame
+        frame.clear()
+        frame.word_wrap = True
+        frame.vertical_anchor = vertical_map.get(
+            str(item.get("vertical_alignment", "top")), MSO_ANCHOR.TOP
+        )
+        margin = Inches(0.02)
+        frame.margin_left = margin
+        frame.margin_right = margin
+        frame.margin_top = margin
+        frame.margin_bottom = margin
+        frame.text = str(item.get("text", ""))
+        for paragraph in frame.paragraphs:
+            paragraph.alignment = alignment_map.get(
+                str(item.get("alignment", "left")), PP_ALIGN.LEFT
+            )
+            for run in paragraph.runs:
+                run.font.name = str(item.get("font_name", typography["font_name"]))
+                run.font.size = Pt(font_size)
+                run.font.bold = bool(item.get("bold", role in {"heading", "metric"}))
+                run.font.color.rgb = resolve_text_color(plan, item.get("color"))
+        added += 1
+    return added
 
 
 def update_cover(slide: Any, plan: dict[str, Any]) -> None:
@@ -481,6 +572,14 @@ def build_deck(plan_path: Path) -> tuple[Path, Path]:
                 title_render_mode = resolved_title_render_mode(plan, slide)
                 if title_render_mode == "native":
                     add_native_content_title(content_slide, plan, slide)
+                editable_text_count = 0
+                if prefer_editable_text(plan) or slide.get("editable_text"):
+                    editable_text_count = add_editable_text_layer(
+                        prs,
+                        content_slide,
+                        plan,
+                        slide,
+                    )
                 ordered_ids.append(content_slide.slide_id)
                 inventory.append(
                     {
@@ -492,6 +591,7 @@ def build_deck(plan_path: Path) -> tuple[Path, Path]:
                         "image": str(image_path),
                         "sha256": hashlib.sha256(image_path.read_bytes()).hexdigest(),
                         "dimensions": {"width": width, "height": height},
+                        "editable_text_count": editable_text_count,
                     }
                 )
 

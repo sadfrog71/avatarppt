@@ -12,6 +12,11 @@ from typing import Any, Iterator
 HEX_COLOR = re.compile(r"^#[0-9A-Fa-f]{6}$")
 DEFAULT_ACCENT_GRAPHIC_AREA_RATIO = 0.25
 DEFAULT_MAX_ACCENT_GRAPHIC_AREA_RATIO = 0.30
+DEFAULT_MAX_IMAGE_AREA_RATIO = 0.30
+DEFAULT_MINIMUM_FONT_SIZE_PT = 18.0
+DEFAULT_BODY_FONT_SIZE_PT = 20.0
+DEFAULT_TITLE_FONT_SIZE_PT = 28.0
+DEFAULT_CAPTION_FONT_SIZE_PT = 18.0
 DEFAULT_PRIMARY_LANGUAGE = "zh-Hant"
 DEFAULT_PROTECTED_TERMS = ("AI", "KPI", "FDE", "SCADA")
 
@@ -59,6 +64,50 @@ def max_accent_graphic_area_ratio(plan: dict[str, Any]) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         return DEFAULT_MAX_ACCENT_GRAPHIC_AREA_RATIO
     return float(value)
+
+
+def max_image_area_ratio(plan: dict[str, Any]) -> float:
+    generation = plan.get("image_generation", {})
+    value = generation.get("max_image_area_ratio", DEFAULT_MAX_IMAGE_AREA_RATIO)
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return DEFAULT_MAX_IMAGE_AREA_RATIO
+    return float(value)
+
+
+def resolved_image_area_ratio(slide: dict[str, Any]) -> float | None:
+    value = slide.get("image_area_ratio")
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return float(value)
+
+
+def typography_policy(plan: dict[str, Any]) -> dict[str, Any]:
+    configured = plan.get("typography", {})
+    if not isinstance(configured, dict):
+        configured = {}
+
+    def number(key: str, fallback: float) -> float:
+        value = configured.get(key, fallback)
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            return fallback
+        return float(value)
+
+    return {
+        "minimum_font_size_pt": number(
+            "minimum_font_size_pt", DEFAULT_MINIMUM_FONT_SIZE_PT
+        ),
+        "body_font_size_pt": number("body_font_size_pt", DEFAULT_BODY_FONT_SIZE_PT),
+        "title_font_size_pt": number("title_font_size_pt", DEFAULT_TITLE_FONT_SIZE_PT),
+        "caption_font_size_pt": number(
+            "caption_font_size_pt", DEFAULT_CAPTION_FONT_SIZE_PT
+        ),
+        "font_name": str(configured.get("font_name", "Microsoft YaHei")),
+        "prefer_editable_text": configured.get("prefer_editable_text", False) is True,
+    }
+
+
+def prefer_editable_text(plan: dict[str, Any]) -> bool:
+    return bool(typography_policy(plan)["prefer_editable_text"])
 
 
 def resolved_graphic_role(plan: dict[str, Any], slide: dict[str, Any]) -> str:

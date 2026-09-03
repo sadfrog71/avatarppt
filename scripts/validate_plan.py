@@ -9,7 +9,12 @@ from pathlib import Path
 from typing import Any
 
 from deck_utils import (
+    DEFAULT_BODY_FONT_SIZE_PT,
+    DEFAULT_CAPTION_FONT_SIZE_PT,
     DEFAULT_MAX_ACCENT_GRAPHIC_AREA_RATIO,
+    DEFAULT_MAX_IMAGE_AREA_RATIO,
+    DEFAULT_MINIMUM_FONT_SIZE_PT,
+    DEFAULT_TITLE_FONT_SIZE_PT,
     HEX_COLOR,
     iter_slides,
     load_plan,
@@ -44,6 +49,16 @@ ALLOWED_VISUAL_SOURCES = {
 }
 ALLOWED_TITLE_RENDER_MODES = {"image", "native", "none"}
 ALLOWED_GRAPHIC_ROLES = {"accent", "explanatory", "evidence", "none"}
+ALLOWED_EDITABLE_TEXT_ROLES = {
+    "heading",
+    "body",
+    "metric",
+    "label",
+    "caption",
+    "note",
+}
+ALLOWED_TEXT_ALIGNMENTS = {"left", "center", "right"}
+ALLOWED_VERTICAL_ALIGNMENTS = {"top", "middle", "bottom"}
 ALLOWED_PRIMARY_LANGUAGES = {"zh-Hant", "zh-Hans", "en", "mixed"}
 ALLOWED_MATERIAL_FORMS = {
     "typography",
@@ -162,6 +177,57 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
         ):
             errors.append("palette.muted must be a six-digit hex color")
 
+    typography = plan.get("typography")
+    minimum_font_size_pt = DEFAULT_MINIMUM_FONT_SIZE_PT
+    body_font_size_pt = DEFAULT_BODY_FONT_SIZE_PT
+    prefer_editable = False
+    if typography is not None:
+        if not isinstance(typography, dict):
+            errors.append("top-level 'typography' must be an object")
+        else:
+            font_defaults = {
+                "minimum_font_size_pt": DEFAULT_MINIMUM_FONT_SIZE_PT,
+                "body_font_size_pt": DEFAULT_BODY_FONT_SIZE_PT,
+                "title_font_size_pt": DEFAULT_TITLE_FONT_SIZE_PT,
+                "caption_font_size_pt": DEFAULT_CAPTION_FONT_SIZE_PT,
+            }
+            resolved_fonts: dict[str, float] = {}
+            for field, fallback in font_defaults.items():
+                value = typography.get(field, fallback)
+                if (
+                    isinstance(value, bool)
+                    or not isinstance(value, (int, float))
+                    or value <= 0
+                ):
+                    errors.append(f"typography.{field} must be a positive number")
+                    resolved_fonts[field] = fallback
+                else:
+                    resolved_fonts[field] = float(value)
+            minimum_font_size_pt = resolved_fonts["minimum_font_size_pt"]
+            body_font_size_pt = resolved_fonts["body_font_size_pt"]
+            if minimum_font_size_pt < 18:
+                errors.append("typography.minimum_font_size_pt must be at least 18")
+            if body_font_size_pt < 20:
+                errors.append("typography.body_font_size_pt must be at least 20")
+            if resolved_fonts["title_font_size_pt"] < body_font_size_pt:
+                errors.append(
+                    "typography.title_font_size_pt must be no smaller than body_font_size_pt"
+                )
+            if resolved_fonts["caption_font_size_pt"] < minimum_font_size_pt:
+                errors.append(
+                    "typography.caption_font_size_pt must be no smaller than minimum_font_size_pt"
+                )
+            font_name = typography.get("font_name")
+            if font_name is not None and (
+                not isinstance(font_name, str) or not font_name.strip()
+            ):
+                errors.append("typography.font_name must be a non-empty string")
+            prefer_value = typography.get("prefer_editable_text", True)
+            if not isinstance(prefer_value, bool):
+                errors.append("typography.prefer_editable_text must be a boolean")
+            else:
+                prefer_editable = prefer_value
+
     authorship = plan.get("authorship")
     if authorship is not None:
         if not isinstance(authorship, dict):
@@ -212,6 +278,7 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
                     errors.append(f"authorship.{field} must be a boolean")
 
     max_accent_graphic_area_ratio = DEFAULT_MAX_ACCENT_GRAPHIC_AREA_RATIO
+    max_image_area_ratio = DEFAULT_MAX_IMAGE_AREA_RATIO
     generation = plan.get("image_generation")
     if not isinstance(generation, dict):
         errors.append("top-level 'image_generation' must be an object")
@@ -246,6 +313,21 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
             )
         else:
             max_accent_graphic_area_ratio = float(configured_graphic_ratio)
+        configured_image_ratio = generation.get(
+            "max_image_area_ratio",
+            DEFAULT_MAX_IMAGE_AREA_RATIO,
+        )
+        if (
+            isinstance(configured_image_ratio, bool)
+            or not isinstance(configured_image_ratio, (int, float))
+            or not 0 < configured_image_ratio <= 0.30
+        ):
+            errors.append(
+                "image_generation.max_image_area_ratio must be a number "
+                "greater than 0 and no greater than 0.30"
+            )
+        else:
+            max_image_area_ratio = float(configured_image_ratio)
         allow_nonwhite = generation.get("allow_nonwhite_background", False)
         if not isinstance(allow_nonwhite, bool):
             errors.append(
@@ -271,6 +353,11 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
         ):
             errors.append(
                 "direct_imagegen_slide cannot use image_generation.local_text_overlay"
+            )
+        if prefer_editable and composition_mode == "direct_imagegen_slide":
+            errors.append(
+                "typography.prefer_editable_text=true conflicts with "
+                "image_generation.composition_mode=direct_imagegen_slide"
             )
         if provider == "openai":
             size = str(generation.get("size", ""))
@@ -455,6 +542,23 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
                 errors.append(
                     f"{prefix}.graphic_area_ratio must be 0 when graphic_role is none"
                 )
+        image_area_ratio = slide.get("image_area_ratio")
+        if image_area_ratio is None:
+            if prefer_editable:
+                errors.append(
+                    f"{prefix}.image_area_ratio is required when editable text is preferred"
+                )
+        elif (
+            isinstance(image_area_ratio, bool)
+            or not isinstance(image_area_ratio, (int, float))
+            or not 0 <= image_area_ratio <= 1
+        ):
+            errors.append(f"{prefix}.image_area_ratio must be a number from 0 to 1")
+        elif image_area_ratio > max_image_area_ratio:
+            errors.append(
+                f"{prefix}.image_area_ratio must be no greater than the configured "
+                f"image limit of {max_image_area_ratio:.2f}"
+            )
         layout_family = slide.get("layout_family")
         if layout_family is not None and (
             not isinstance(layout_family, str) or not layout_family.strip()
@@ -504,6 +608,8 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
             errors.append(f"{prefix}.exact_text must be a non-empty array")
         elif any(not isinstance(item, str) or not item.strip() for item in exact_text):
             errors.append(f"{prefix}.exact_text contains an empty/non-string item")
+        elif len(exact_text) != len(set(exact_text)):
+            errors.append(f"{prefix}.exact_text must not contain duplicate items")
         elif thesis_expression == "implicit" and isinstance(storyline, dict):
             visible_text = "\n".join(exact_text)
             for field in ("core_thesis", "decision_request"):
@@ -512,6 +618,123 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
                     errors.append(
                         f"{prefix}.exact_text leaks storyline.{field} while "
                         "thesis_expression is implicit"
+                    )
+
+        editable_text = slide.get("editable_text")
+        if editable_text is None:
+            if prefer_editable:
+                errors.append(
+                    f"{prefix}.editable_text is required when typography.prefer_editable_text=true"
+                )
+        elif not isinstance(editable_text, list) or not editable_text:
+            errors.append(f"{prefix}.editable_text must be a non-empty array")
+        else:
+            editable_strings: list[str] = []
+            for item_index, item in enumerate(editable_text):
+                item_prefix = f"{prefix}.editable_text[{item_index}]"
+                if not isinstance(item, dict):
+                    errors.append(f"{item_prefix} must be an object")
+                    continue
+                text = item.get("text")
+                if not isinstance(text, str) or not text.strip():
+                    errors.append(f"{item_prefix}.text is required")
+                else:
+                    editable_strings.append(text)
+                role = item.get("role", "body")
+                if role not in ALLOWED_EDITABLE_TEXT_ROLES:
+                    errors.append(
+                        f"{item_prefix}.role must be heading, body, metric, label, "
+                        "caption, or note"
+                    )
+                for field in ("x", "y", "width", "height"):
+                    value = item.get(field)
+                    if (
+                        isinstance(value, bool)
+                        or not isinstance(value, (int, float))
+                        or not 0 <= value <= 1
+                    ):
+                        errors.append(
+                            f"{item_prefix}.{field} must be a normalized number from 0 to 1"
+                        )
+                x = item.get("x")
+                y = item.get("y")
+                width = item.get("width")
+                height = item.get("height")
+                if all(
+                    not isinstance(value, bool) and isinstance(value, (int, float))
+                    for value in (x, y, width, height)
+                ):
+                    if width <= 0 or height <= 0:
+                        errors.append(f"{item_prefix}.width and height must be positive")
+                    if x + width > 1.0001 or y + height > 1.0001:
+                        errors.append(f"{item_prefix} extends beyond the slide canvas")
+                font_size = item.get("font_size_pt")
+                if (
+                    isinstance(font_size, bool)
+                    or not isinstance(font_size, (int, float))
+                ):
+                    errors.append(f"{item_prefix}.font_size_pt must be a number")
+                else:
+                    required_size = (
+                        minimum_font_size_pt
+                        if role in {"caption", "label", "note"}
+                        else body_font_size_pt
+                    )
+                    if font_size < required_size:
+                        errors.append(
+                            f"{item_prefix}.font_size_pt must be at least "
+                            f"{required_size:g} for role={role}"
+                        )
+                bold = item.get("bold")
+                if bold is not None and not isinstance(bold, bool):
+                    errors.append(f"{item_prefix}.bold must be a boolean")
+                alignment = item.get("alignment")
+                if alignment is not None and alignment not in ALLOWED_TEXT_ALIGNMENTS:
+                    errors.append(
+                        f"{item_prefix}.alignment must be left, center, or right"
+                    )
+                vertical = item.get("vertical_alignment")
+                if (
+                    vertical is not None
+                    and vertical not in ALLOWED_VERTICAL_ALIGNMENTS
+                ):
+                    errors.append(
+                        f"{item_prefix}.vertical_alignment must be top, middle, or bottom"
+                    )
+                color = item.get("color")
+                if color is not None and (
+                    not isinstance(color, str)
+                    or (
+                        color not in {"primary", "secondary", "accent", "text", "muted"}
+                        and not HEX_COLOR.fullmatch(color)
+                    )
+                ):
+                    errors.append(
+                        f"{item_prefix}.color must be a palette key or six-digit hex color"
+                    )
+            if prefer_editable and isinstance(exact_text, list):
+                planned = [str(item) for item in exact_text]
+                missing = [
+                    item for item in planned if editable_strings.count(item) != 1
+                ]
+                unplanned = [item for item in editable_strings if item not in planned]
+                if missing:
+                    errors.append(
+                        f"{prefix}.editable_text must contain each exact_text item exactly once: "
+                        + ", ".join(missing)
+                    )
+                if unplanned:
+                    errors.append(
+                        f"{prefix}.editable_text contains text outside exact_text: "
+                        + ", ".join(unplanned)
+                    )
+                if (
+                    title_render_mode == "native"
+                    and isinstance(slide.get("title"), str)
+                    and slide["title"] in editable_strings
+                ):
+                    errors.append(
+                        f"{prefix}.editable_text duplicates the native title"
                     )
 
         image = slide.get("image")

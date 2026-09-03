@@ -68,6 +68,14 @@
     "allowed_formulaic_titles": [],
     "allowed_cliche_terms": []
   },
+  "typography": {
+    "font_name": "Microsoft YaHei",
+    "minimum_font_size_pt": 18,
+    "body_font_size_pt": 20,
+    "title_font_size_pt": 28,
+    "caption_font_size_pt": 18,
+    "prefer_editable_text": true
+  },
   "palette": {
     "name": "青綠科技",
     "primary": "#0B6E69",
@@ -82,10 +90,13 @@
     "model": "gpt-image-2",
     "size": "2048x1152",
     "quality": "high",
-    "composition_mode": "direct_imagegen_slide",
+    "composition_mode": "designed_canvas",
+    "local_text_overlay": true,
+    "source_directory": "generated-backgrounds",
     "background_mode": "solid",
     "allow_nonwhite_background": false,
     "max_accent_graphic_area_ratio": 0.30,
+    "max_image_area_ratio": 0.30,
     "style": "clean executive technology presentation",
     "negative_prompt": "no watermark, no logo, no duplicated text, no cropped text, no gradient background, no photo background, no texture, no pattern, no excessive glow, no scenic wallpaper, no disconnected card collection, no repeated generic line-icon filler, no automatic circular icon badges, no repeated rounded-card grid, no glowing AI brain or chip, no fake dashboard, no arrows without relationships, no automatic symmetric hub-and-spoke, no excessive ornament"
   },
@@ -116,24 +127,79 @@
           "layout_type": "metrics",
           "title_render_mode": "native",
           "information_topology": "comparison",
-          "visual_source": "native_chart",
+          "visual_source": "generated_visual",
           "source_asset_refs": [
             "source/risk-warning-metrics.xlsx"
           ],
           "layout_family": "evidence_comparison",
           "material_form": "data_visual",
           "graphic_role": "evidence",
-          "graphic_area_ratio": 0.55,
+          "graphic_area_ratio": 0.25,
+          "image_area_ratio": 0.25,
           "semantic_visual_anchor": "基線、目標與實際提前量的三段對比圖",
           "graphic_devices": [
-            "native baseline-target-actual chart",
-            "source note"
+            "compact text-free baseline-target-actual bar comparison",
+            "native editable source note"
           ],
           "exact_text": [
             "基線：平均提前6小時",
             "目標：提前24小時",
             "實際：提前36小時",
             "週期：2026年1—6月"
+          ],
+          "editable_text": [
+            {
+              "text": "基線：平均提前6小時",
+              "role": "metric",
+              "x": 0.08,
+              "y": 0.30,
+              "width": 0.38,
+              "height": 0.12,
+              "font_size_pt": 24,
+              "bold": true,
+              "color": "primary",
+              "alignment": "left",
+              "vertical_alignment": "middle"
+            },
+            {
+              "text": "目標：提前24小時",
+              "role": "metric",
+              "x": 0.08,
+              "y": 0.44,
+              "width": 0.38,
+              "height": 0.12,
+              "font_size_pt": 24,
+              "bold": true,
+              "color": "secondary",
+              "alignment": "left",
+              "vertical_alignment": "middle"
+            },
+            {
+              "text": "實際：提前36小時",
+              "role": "metric",
+              "x": 0.08,
+              "y": 0.58,
+              "width": 0.38,
+              "height": 0.12,
+              "font_size_pt": 28,
+              "bold": true,
+              "color": "accent",
+              "alignment": "left",
+              "vertical_alignment": "middle"
+            },
+            {
+              "text": "週期：2026年1—6月",
+              "role": "caption",
+              "x": 0.08,
+              "y": 0.73,
+              "width": 0.38,
+              "height": 0.08,
+              "font_size_pt": 18,
+              "bold": false,
+              "color": "muted",
+              "alignment": "left",
+              "vertical_alignment": "middle"
+            }
           ],
           "result_evidence": {
             "baseline": "平均提前6小時",
